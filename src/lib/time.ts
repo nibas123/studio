@@ -2,7 +2,7 @@ import { format, formatDuration as formatDurationFns, intervalToDuration, differ
 
 export const formatTime = (date: Date | string): string => {
   const dt = typeof date === 'string' ? new Date(date) : date;
-  return format(dt, 'HH:mm:ss');
+  return format(dt, 'hh:mm:ss a');
 };
 
 export const formatDate = (date: Date | string): string => {
@@ -12,7 +12,7 @@ export const formatDate = (date: Date | string): string => {
 
 export const formatDateTime = (date: Date | string): string => {
   const dt = typeof date === 'string' ? new Date(date) : date;
-  return format(dt, 'PPpp');
+  return format(dt, 'PP, h:mm a');
 };
 
 export const formatDuration = (milliseconds: number): string => {
