@@ -31,8 +31,8 @@ export default function ClockCard({
   return (
     <Card className="w-full shadow-lg">
       <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <span>Status</span>
+        <CardTitle className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <span className="text-xl sm:text-2xl">Status</span>
           <div className="flex items-center gap-2 text-lg font-mono tracking-wider bg-primary/10 px-3 py-1 rounded-md">
             <Clock className="h-5 w-5 text-primary" />
             <span>{formatTime(currentTime)}</span>
@@ -70,20 +70,20 @@ export default function ClockCard({
           )}
         </Button>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full text-center pt-6">
+        <div className="grid grid-cols-3 gap-2 w-full text-center pt-6">
           <div>
-            <p className="text-sm text-muted-foreground uppercase tracking-wider">Time Remaining</p>
-            <p className={`text-2xl font-bold font-mono ${remainingTimeMs < 0 ? 'text-muted-foreground' : 'text-primary'}`}>
+            <p className="text-xs text-muted-foreground uppercase tracking-wider">Remaining</p>
+            <p className={`text-xl sm:text-2xl font-bold font-mono ${remainingTimeMs < 0 ? 'text-muted-foreground' : 'text-primary'}`}>
               {formatDuration(remainingTimeMs)}
             </p>
           </div>
           <div>
-            <p className="text-sm text-muted-foreground uppercase tracking-wider">Total Worked</p>
-            <p className="text-2xl font-bold font-mono">{formatDuration(totalWorkTodayMs)}</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wider">Worked</p>
+            <p className="text-xl sm:text-2xl font-bold font-mono">{formatDuration(totalWorkTodayMs)}</p>
           </div>
           <div>
-            <p className="text-sm text-muted-foreground uppercase tracking-wider">Overtime</p>
-            <p className={`text-2xl font-bold font-mono ${overtimeMs > 0 ? 'text-destructive' : ''}`}>
+            <p className="text-xs text-muted-foreground uppercase tracking-wider">Overtime</p>
+            <p className={`text-xl sm:text-2xl font-bold font-mono ${overtimeMs > 0 ? 'text-destructive' : ''}`}>
               {formatDuration(overtimeMs)}
             </p>
           </div>

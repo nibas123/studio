@@ -17,13 +17,13 @@ interface AppHeaderProps {
 export default function AppHeader({ settings, onSaveSettings, onSaveManualEntry, isClockedIn, onResetData }: AppHeaderProps) {
   return (
     <header className="flex items-center justify-between pb-4 border-b">
-      <h1 className="text-3xl font-bold text-primary-foreground/90">
+      <h1 className="text-2xl sm:text-3xl font-bold text-primary-foreground/90">
         TimeFlow
       </h1>
       <div className="flex items-center gap-2">
         <ManualEntryDialog onSave={onSaveManualEntry} isClockedIn={isClockedIn}>
           <Button variant="outline" size="sm">
-            <PlusCircle className="mr-0 sm:mr-2 h-4 w-4" />
+            <PlusCircle className="h-4 w-4 sm:mr-2" />
             <span className="hidden sm:inline">Manual Entry</span>
           </Button>
         </ManualEntryDialog>
