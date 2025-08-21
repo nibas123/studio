@@ -87,11 +87,16 @@ export default function Dashboard() {
   const handleUpdateEntry = (updatedEntry: TimeEntry) => {
     setAllEntries(prev => prev.map(entry => entry.id === updatedEntry.id ? updatedEntry : entry));
   };
+  
+  const handleResetData = () => {
+    setAllEntries([]);
+    setSettings({ dailyWorkHourLimit: 8 });
+  };
 
 
   return (
     <div className="space-y-6">
-      <AppHeader onSaveSettings={setSettings} settings={settings} onSaveManualEntry={handleSaveManualEntry} isClockedIn={isClockedIn} />
+      <AppHeader onSaveSettings={setSettings} settings={settings} onSaveManualEntry={handleSaveManualEntry} isClockedIn={isClockedIn} onResetData={handleResetData} />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-3">
           <ClockCard

@@ -11,9 +11,10 @@ interface AppHeaderProps {
   onSaveSettings: (settings: AppSettings) => void;
   onSaveManualEntry: (entry: { clockIn?: string; clockOut?: string }) => void;
   isClockedIn: boolean;
+  onResetData: () => void;
 }
 
-export default function AppHeader({ settings, onSaveSettings, onSaveManualEntry, isClockedIn }: AppHeaderProps) {
+export default function AppHeader({ settings, onSaveSettings, onSaveManualEntry, isClockedIn, onResetData }: AppHeaderProps) {
   return (
     <header className="flex items-center justify-between pb-4 border-b">
       <h1 className="text-3xl font-bold text-primary-foreground/90">
@@ -26,7 +27,7 @@ export default function AppHeader({ settings, onSaveSettings, onSaveManualEntry,
             <span className="hidden sm:inline">Manual Entry</span>
           </Button>
         </ManualEntryDialog>
-        <SettingsDialog settings={settings} onSave={onSaveSettings}>
+        <SettingsDialog settings={settings} onSave={onSaveSettings} onReset={onResetData}>
           <Button variant="ghost" size="icon">
             <Settings className="h-5 w-5" />
             <span className="sr-only">Settings</span>
