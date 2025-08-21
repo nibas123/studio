@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Pencil, Trash2, Save, X, Clock, LogIn, LogOut } from 'lucide-react';
+import { Pencil, Trash2, Save, X, LogIn, LogOut } from 'lucide-react';
 import { formatDateTime, formatDuration, calculateEntryDuration } from '@/lib/time';
 import { Input } from '../ui/input';
 
@@ -40,7 +40,7 @@ export default function HistoryCard({ entries, onDelete, onUpdate }: HistoryCard
     setEditingEntryId(null);
   };
 
-  const renderEntryActions = (entry: TimeEntry) => (
+  const renderEntryActions = (entry: TimeEntry, isMobile: boolean = false) => (
     <div className="flex justify-end items-center mt-2 sm:mt-0 sm:justify-end">
         {editingEntryId === entry.id ? (
             <>
@@ -83,14 +83,14 @@ export default function HistoryCard({ entries, onDelete, onUpdate }: HistoryCard
                           </div>
                           <div className="flex items-center justify-between pt-2">
                              <div className="text-sm font-mono text-primary">{formatDuration(calculateEntryDuration({clockIn: editValues.clockIn, clockOut: editValues.clockOut}))}</div>
-                             {renderEntryActions(entry)}
+                             {renderEntryActions(entry, true)}
                           </div>
                        </>
                     ) : (
                         <>
                            <div className="flex items-center justify-between">
                                 <span className="text-sm text-muted-foreground">Entry</span>
-                                {renderEntryActions(entry)}
+                                {renderEntryActions(entry, true)}
                            </div>
                            <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
