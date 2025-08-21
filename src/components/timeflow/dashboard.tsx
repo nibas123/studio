@@ -61,13 +61,23 @@ export default function Dashboard() {
     );
   };
   
-  const handleSaveManualEntry = (entry: { clockIn: string; clockOut: string }) => {
-     const newEntry: TimeEntry = {
-      id: uuidv4(),
-      clockIn: new Date(entry.clockIn).toISOString(),
-      clockOut: new Date(entry.clockOut).toISOString(),
-    };
-    setAllEntries(prev => [...prev, newEntry]);
+  const handleSaveManualEntry = (entry: { clockIn?: string; clockOut?: string }) => {
+     if (isClockedIn && entry.clockOut && currentEntry) {
+        setAllEntries(prev =>
+          prev.map(e =>
+            e.id === currentEntry.id
+              ? { ...e, clockOut: new Date(entry.clockOut!).toISOString() }
+              : e
+          )
+        );
+     } else if (!isClockedIn && entry.clockIn && entry.clockOut) {
+        const newEntry: TimeEntry = {
+            id: uuidv4(),
+            clockIn: new Date(entry.clockIn).toISOString(),
+            clockOut: new Date(entry.clockOut).toISOString(),
+        };
+        setAllEntries(prev => [...prev, newEntry]);
+     }
   };
 
   const handleDeleteEntry = (id: string) => {
@@ -81,7 +91,7 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <AppHeader onSaveSettings={setSettings} settings={settings} onSaveManualEntry={handleSaveManualEntry} />
+      <AppHeader onSaveSettings={setSettings} settings={settings} onSaveManualEntry={handleSaveManualEntry} isClockedIn={isClockedIn} />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-3">
           <ClockCard

@@ -16,15 +16,17 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { useEffect } from 'react';
 
 const formSchema = z.object({
-  clockIn: z.string().refine((val) => !isNaN(Date.parse(val)), {
-    message: "Invalid date format",
-  }),
-  clockOut: z.string().refine((val) => !isNaN(Date.parse(val)), {
-    message: "Invalid date format",
-  }),
-}).refine(data => new Date(data.clockIn) < new Date(data.clockOut), {
+  clockIn: z.string().optional(),
+  clockOut: z.string().optional(),
+}).refine(data => {
+  if (data.clockIn && data.clockOut) {
+    return new Date(data.clockIn) < new Date(data.clockOut);
+  }
+  return true;
+}, {
   message: "Clock out must be after clock in",
   path: ["clockOut"],
 });
@@ -32,21 +34,31 @@ const formSchema = z.object({
 
 interface ManualEntryDialogProps {
   children: React.ReactNode;
-  onSave: (entry: { clockIn: string; clockOut: string }) => void;
+  onSave: (entry: { clockIn?: string; clockOut?: string }) => void;
+  isClockedIn: boolean;
 }
 
-export default function ManualEntryDialog({ children, onSave }: ManualEntryDialogProps) {
+const toLocalISOString = (date: Date) => {
+    const tzoffset = date.getTimezoneOffset() * 60000;
+    const localISOTime = (new Date(date.getTime() - tzoffset)).toISOString().slice(0, 16);
+    return localISOTime;
+}
+
+export default function ManualEntryDialog({ children, onSave, isClockedIn }: ManualEntryDialogProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      clockIn: "",
-      clockOut: "",
-    },
   });
+
+  useEffect(() => {
+      form.reset({
+        clockIn: !isClockedIn ? toLocalISOString(new Date()) : undefined,
+        clockOut: isClockedIn ? toLocalISOString(new Date()) : undefined,
+      });
+  }, [isClockedIn, form]);
+
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     onSave(values);
-    form.reset();
   }
 
   return (
@@ -56,24 +68,30 @@ export default function ManualEntryDialog({ children, onSave }: ManualEntryDialo
         <DialogHeader>
           <DialogTitle>Manual Time Entry</DialogTitle>
           <DialogDescription>
-            Forgot to clock in or out? Add your entry here.
+            {isClockedIn 
+              ? "You are currently clocked in. Add a clock out time."
+              : "Forgot to clock in or out? Add your entry here."
+            }
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
-            <FormField
-              control={form.control}
-              name="clockIn"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Clock In</FormLabel>
-                  <FormControl>
-                    <Input type="datetime-local" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {!isClockedIn && (
+              <FormField
+                control={form.control}
+                name="clockIn"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Clock In</FormLabel>
+                    <FormControl>
+                      <Input type="datetime-local" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+            
             <FormField
               control={form.control}
               name="clockOut"
