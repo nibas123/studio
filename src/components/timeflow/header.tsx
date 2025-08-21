@@ -2,9 +2,13 @@
 
 import type { AppSettings } from '@/types';
 import { Button } from '@/components/ui/button';
-import { Settings, PlusCircle } from 'lucide-react';
+import { Settings, PlusCircle, Moon, Sun } from 'lucide-react';
 import SettingsDialog from './settings-dialog';
 import ManualEntryDialog from './manual-entry-dialog';
+import { useSidebar } from '@/components/ui/sidebar';
+import { SidebarTrigger } from '@/components/ui/sidebar';
+import { ThemeToggle } from './theme-toggle';
+
 
 interface AppHeaderProps {
   settings: AppSettings;
@@ -15,11 +19,16 @@ interface AppHeaderProps {
 }
 
 export default function AppHeader({ settings, onSaveSettings, onSaveManualEntry, isClockedIn, onResetData }: AppHeaderProps) {
+  const { isMobile } = useSidebar();
+  
   return (
-    <header className="flex items-center justify-between pb-4 border-b">
-      <h1 className="text-2xl sm:text-3xl font-bold text-primary-foreground/90">
-        TimeFlow
-      </h1>
+    <header className="flex items-center justify-between p-4 border-b">
+      <div className="flex items-center gap-2">
+        {isMobile && <SidebarTrigger />}
+        <h1 className="text-2xl font-bold">
+          Dashboard
+        </h1>
+      </div>
       <div className="flex items-center gap-2">
         <ManualEntryDialog onSave={onSaveManualEntry} isClockedIn={isClockedIn}>
           <Button variant="outline" size="sm">
@@ -33,6 +42,7 @@ export default function AppHeader({ settings, onSaveSettings, onSaveManualEntry,
             <span className="sr-only">Settings</span>
           </Button>
         </SettingsDialog>
+        <ThemeToggle />
       </div>
     </header>
   );

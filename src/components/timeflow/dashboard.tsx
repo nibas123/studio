@@ -95,11 +95,10 @@ export default function Dashboard() {
 
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col h-full">
       <AppHeader onSaveSettings={setSettings} settings={settings} onSaveManualEntry={handleSaveManualEntry} isClockedIn={isClockedIn} onResetData={handleResetData} />
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-3">
-          <ClockCard
+      <main className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
+        <ClockCard
             currentTime={currentTime}
             isClockedIn={isClockedIn}
             onClockIn={handleClockIn}
@@ -107,13 +106,10 @@ export default function Dashboard() {
             totalWorkTodayMs={totalWorkTodayMs}
             dailyLimitHours={settings.dailyWorkHourLimit}
             clockInTime={currentEntry?.clockIn}
-          />
-        </div>
-        <div className="lg:col-span-3">
-          <HistoryCard entries={todaysEntries} onDelete={handleDeleteEntry} onUpdate={handleUpdateEntry} />
-        </div>
-      </div>
-      {isClockedIn && <AiAlert allEntries={allEntries} settings={settings} />}
+        />
+        <HistoryCard entries={todaysEntries} onDelete={handleDeleteEntry} onUpdate={handleUpdateEntry} />
+        {isClockedIn && <AiAlert allEntries={allEntries} settings={settings} />}
+      </main>
     </div>
   );
 }

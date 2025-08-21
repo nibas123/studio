@@ -57,7 +57,7 @@ export default function HistoryCard({ entries, onDelete, onUpdate }: HistoryCard
   );
 
   return (
-    <Card className="shadow-lg">
+    <Card className="shadow-lg border-none bg-card/50">
       <CardHeader>
         <CardTitle>Today's History</CardTitle>
         <CardDescription>A summary of your work sessions for today.</CardDescription>
@@ -68,7 +68,7 @@ export default function HistoryCard({ entries, onDelete, onUpdate }: HistoryCard
           {entries.length > 0 ? (
             <div className="space-y-4">
               {entries.map((entry) => (
-                 <div key={entry.id} className="border rounded-lg p-4 space-y-3">
+                 <div key={entry.id} className="border rounded-lg p-4 space-y-3 bg-background/50">
                     {editingEntryId === entry.id ? (
                        <>
                           <div className="space-y-2">
