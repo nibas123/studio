@@ -82,12 +82,12 @@ export const calculateTodaysBreak = (
     return totalBreak;
 }
 
-export const calculateEntryDuration = (entry: { clockIn: string; clockOut: string | null }): number => {
-  if (!entry.clockOut) return 0;
-  const start = new Date(entry.clockIn);
-  const end = new Date(entry.clockOut);
-  return differenceInMilliseconds(end, start);
-}
+export const calculateEntryDuration = (entry: Partial<TimeEntry>): number => {
+    if (!entry.clockIn || !entry.clockOut) return 0;
+    const start = new Date(entry.clockIn);
+    const end = new Date(entry.clockOut);
+    return differenceInMilliseconds(end, start);
+};
 
 
 export const calculateDailySummary = (allEntries: TimeEntry[], date: Date): DailySummaryData => {

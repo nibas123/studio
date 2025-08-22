@@ -29,33 +29,59 @@ export default function EndDayDialog({ isOpen, onClose, entries, selectedDate }:
         const summary = calculateDailySummary(entries, selectedDate);
         const doc = new jsPDF();
 
-        doc.setFontSize(18);
-        doc.text(`Daily Summary - ${formatDate(selectedDate)}`, 14, 22);
+        let y = 22; // Initial Y position
 
+        // Title
+        doc.setFontSize(18);
+        doc.text(`Daily Summary - ${formatDate(selectedDate)}`, 14, y);
+        y += 10;
+
+        // Summary Metrics
         doc.setFontSize(12);
-        doc.text(`Total Work: ${formatDuration(summary.totalWork)}`, 14, 32);
-        doc.text(`Total Break: ${formatDuration(summary.totalBreak)}`, 14, 40);
-        doc.text(`First Clock-In: ${summary.firstClockIn ? formatTime(summary.firstClockIn) : 'N/A'}`, 14, 48);
-        doc.text(`Last Clock-Out: ${summary.lastClockOut ? formatTime(summary.lastClockOut) : 'N/A'}`, 14, 56);
+        doc.text(`Total Work: ${formatDuration(summary.totalWork)}`, 14, y);
+        y += 8;
+        doc.text(`Total Break: ${formatDuration(summary.totalBreak)}`, 14, y);
+        y += 8;
+        doc.text(`First Clock-In: ${summary.firstClockIn ? formatTime(summary.firstClockIn) : 'N/A'}`, 14, y);
+        y += 8;
+        doc.text(`Last Clock-Out: ${summary.lastClockOut ? formatTime(summary.lastClockOut) : 'N/A'}`, 14, y);
+        y += 14;
         
+        // Entries section
         if (summary.entries.length > 0) {
             doc.setFontSize(14);
-            doc.text("Entries:", 14, 70);
-            let y = 78;
+            doc.text("Entries:", 14, y);
+            y += 8;
             summary.entries.forEach(entry => {
+                if (y > 280) { // Add new page if content overflows
+                    doc.addPage();
+                    y = 20;
+                }
                 doc.setFontSize(10);
                 const clockIn = `IN: ${formatTime(entry.clockIn)}`;
                 const clockOut = entry.clockOut ? `OUT: ${formatTime(entry.clockOut)}` : 'OUT: In Progress';
-                doc.text(`${clockIn} - ${clockOut}`, 14, y);
+                const duration = `DURATION: ${formatDuration(calculateEntryDuration(entry))}`;
+                doc.text(`${clockIn} - ${clockOut} (${duration})`, 14, y);
                 y += 6;
             });
         }
+        
+        y += 10; // Add space before next section
 
+        // Breaks section
         if (summary.breaks.length > 0) {
+            if (y > 280) {
+                doc.addPage();
+                y = 20;
+            }
             doc.setFontSize(14);
-            doc.text("Breaks:", 14, 110);
-            let y = 118;
+            doc.text("Breaks:", 14, y);
+            y += 8;
             summary.breaks.forEach(b => {
+                 if (y > 280) {
+                    doc.addPage();
+                    y = 20;
+                }
                 doc.setFontSize(10);
                 const start = `START: ${formatTime(b.start)}`;
                 const end = `END: ${formatTime(b.end)}`;
@@ -78,8 +104,8 @@ export default function EndDayDialog({ isOpen, onClose, entries, selectedDate }:
           </DialogDescription>
         </DialogHeader>
         
-        <div className="p-4 bg-background max-h-[60vh] overflow-y-auto">
-             <div className="p-4 bg-white text-black light">
+        <div className="max-h-[60vh] overflow-y-auto p-1">
+             <div className="p-4 light bg-white text-black">
                 <DailySummary entries={entries} selectedDate={selectedDate} />
              </div>
         </div>
@@ -92,3 +118,4 @@ export default function EndDayDialog({ isOpen, onClose, entries, selectedDate }:
     </Dialog>
   );
 }
+
