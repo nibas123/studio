@@ -1,6 +1,7 @@
 
 "use client";
 
+import * as React from 'react';
 import type { TimeEntry } from '@/types';
 import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -100,4 +101,3 @@ export default function DailySummary({ entries, selectedDate, onUpdate, onDelete
     </div>
   );
 }
-
