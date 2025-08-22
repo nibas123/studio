@@ -62,7 +62,7 @@ export default function ManualEntryDialog({ children, onSave, isClockedIn }: Man
     if(isOpen) {
         resetForm();
     }
-  }, [isOpen]);
+  }, [isOpen, isClockedIn]);
 
 
   function onSubmit(values: z.infer<typeof formSchema>) {
