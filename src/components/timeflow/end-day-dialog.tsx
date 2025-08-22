@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from 'react';
@@ -28,65 +29,100 @@ export default function EndDayDialog({ isOpen, onClose, entries, selectedDate }:
         const summary = calculateDailySummary(entries, selectedDate);
         const doc = new jsPDF();
 
-        let y = 22; // Initial Y position
+        let y = 20;
 
         // Title
-        doc.setFontSize(18);
-        doc.text(`Daily Summary - ${formatDate(selectedDate)}`, 14, y);
-        y += 10;
+        doc.setFontSize(22);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`Daily Summary`, 105, y, { align: 'center' });
+        y += 8;
+
+        // Date
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        doc.text(formatDate(selectedDate), 105, y, { align: 'center' });
+        y += 12;
+
+        // Line Separator
+        doc.setDrawColor(200); // a light grey
+        doc.line(14, y, 196, y);
+        y += 12;
 
         // Summary Metrics
         doc.setFontSize(12);
-        doc.text(`Total Work: ${formatDuration(summary.totalWork)}`, 14, y);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Total Work:', 14, y);
+        doc.setFont('helvetica', 'normal');
+        doc.text(formatDuration(summary.totalWork), 50, y);
+
+        doc.setFont('helvetica', 'bold');
+        doc.text('Total Break:', 105, y);
+        doc.setFont('helvetica', 'normal');
+        doc.text(formatDuration(summary.totalBreak), 140, y);
         y += 8;
-        doc.text(`Total Break: ${formatDuration(summary.totalBreak)}`, 14, y);
-        y += 8;
-        doc.text(`First Clock-In: ${summary.firstClockIn ? formatTime(summary.firstClockIn) : 'N/A'}`, 14, y);
-        y += 8;
-        doc.text(`Last Clock-Out: ${summary.lastClockOut ? formatTime(summary.lastClockOut) : 'N/A'}`, 14, y);
+
+        doc.setFont('helvetica', 'bold');
+        doc.text('First Clock-In:', 14, y);
+        doc.setFont('helvetica', 'normal');
+        doc.text(summary.firstClockIn ? formatTime(summary.firstClockIn) : 'N/A', 50, y);
+
+        doc.setFont('helvetica', 'bold');
+        doc.text('Last Clock-Out:', 105, y);
+        doc.setFont('helvetica', 'normal');
+        doc.text(summary.lastClockOut ? formatTime(summary.lastClockOut) : 'N/A', 140, y);
         y += 14;
+
         
         // Entries section
         if (summary.entries.length > 0) {
-            doc.setFontSize(14);
-            doc.text("Entries:", 14, y);
-            y += 8;
+            doc.line(14, y, 196, y);
+            y += 10;
+            doc.setFontSize(16);
+            doc.setFont('helvetica', 'bold');
+            doc.text("Time Entries", 14, y);
+            y += 10;
+
             summary.entries.forEach(entry => {
                 if (y > 280) { // Add new page if content overflows
                     doc.addPage();
                     y = 20;
                 }
                 doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
                 const clockIn = `IN: ${formatTime(entry.clockIn)}`;
                 const clockOut = entry.clockOut ? `OUT: ${formatTime(entry.clockOut)}` : 'OUT: In Progress';
                 const duration = `DURATION: ${formatDuration(calculateEntryDuration(entry))}`;
-                doc.text(`${clockIn} - ${clockOut} (${duration})`, 14, y);
-                y += 6;
+                doc.text(`${clockIn}  —  ${clockOut}  —  ${duration}`, 14, y);
+                y += 7;
             });
         }
         
-        y += 10; // Add space before next section
+        y += 5;
 
         // Breaks section
         if (summary.breaks.length > 0) {
-            if (y > 280) {
+            if (y > 270) {
                 doc.addPage();
                 y = 20;
             }
-            doc.setFontSize(14);
-            doc.text("Breaks:", 14, y);
-            y += 8;
+            doc.line(14, y, 196, y);
+            y += 10;
+            doc.setFontSize(16);
+            doc.setFont('helvetica', 'bold');
+            doc.text("Breaks", 14, y);
+            y += 10;
             summary.breaks.forEach(b => {
                  if (y > 280) {
                     doc.addPage();
                     y = 20;
                 }
                 doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
                 const start = `START: ${formatTime(b.start)}`;
                 const end = `END: ${formatTime(b.end)}`;
                 const duration = `DURATION: ${formatDuration(b.duration)}`;
-                doc.text(`${start} - ${end} (${duration})`, 14, y);
-                y += 6;
+                doc.text(`${start}  —  ${end}  —  ${duration}`, 14, y);
+                y += 7;
             });
         }
         
@@ -117,3 +153,4 @@ export default function EndDayDialog({ isOpen, onClose, entries, selectedDate }:
     </Dialog>
   );
 }
+
