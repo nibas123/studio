@@ -53,7 +53,7 @@ export default function ManualEntryDialog({ children, onSave, isClockedIn }: Man
   const resetForm = () => {
     const now = toLocalISOString(new Date());
     form.reset({
-      clockIn: isClockedIn ? undefined : now,
+      clockIn: now,
       clockOut: now,
     });
   }
@@ -62,7 +62,7 @@ export default function ManualEntryDialog({ children, onSave, isClockedIn }: Man
     if(isOpen) {
         resetForm();
     }
-  }, [isClockedIn, isOpen]);
+  }, [isOpen]);
 
 
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -78,8 +78,8 @@ export default function ManualEntryDialog({ children, onSave, isClockedIn }: Man
           <DialogTitle>Manual Time Entry</DialogTitle>
           <DialogDescription>
             {isClockedIn 
-              ? "You are currently clocked in. Add a clock out time to complete your entry."
-              : "Forgot to clock in or out? Add your new entry here."
+              ? "You are currently clocked in. Add a clock out time to complete your current entry."
+              : "Forgot to record a work session? Add a complete entry here."
             }
           </DialogDescription>
         </DialogHeader>
