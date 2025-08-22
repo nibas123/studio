@@ -21,11 +21,9 @@ const formSchema = z.object({
   clockIn: z.string().optional(),
   clockOut: z.string().optional(),
 }).refine(data => {
-  // If both are present, clockOut must be after clockIn
   if (data.clockIn && data.clockOut) {
     return new Date(data.clockIn) < new Date(data.clockOut);
   }
-  // If only one is present or none, validation passes
   return true;
 }, {
   message: "Clock out must be after clock in",
