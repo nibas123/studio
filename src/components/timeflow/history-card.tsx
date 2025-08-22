@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Pencil, Trash2, Save, X, LogIn, LogOut } from 'lucide-react';
-import { formatDateTime, formatDuration, calculateEntryDuration } from '@/lib/time';
+import { formatTime, formatDuration, calculateEntryDuration } from '@/lib/time';
 import { Input } from '../ui/input';
 
 interface HistoryCardProps {
@@ -40,8 +40,8 @@ export default function HistoryCard({ entries, onDelete, onUpdate }: HistoryCard
     setEditingEntryId(null);
   };
 
-  const renderEntryActions = (entry: TimeEntry, isMobile: boolean = false) => (
-    <div className="flex justify-end items-center mt-2 sm:mt-0 sm:justify-end">
+  const renderEntryActions = (entry: TimeEntry) => (
+    <div className="flex justify-end items-center">
         {editingEntryId === entry.id ? (
             <>
                 <Button variant="ghost" size="icon" onClick={() => handleSaveEdit(entry.id)}><Save className="h-4 w-4 text-green-500" /></Button>
@@ -59,8 +59,8 @@ export default function HistoryCard({ entries, onDelete, onUpdate }: HistoryCard
   return (
     <Card className="shadow-lg border-none bg-card/50">
       <CardHeader>
-        <CardTitle>Today's History</CardTitle>
-        <CardDescription>A summary of your work sessions for today.</CardDescription>
+        <CardTitle>Today's Entries</CardTitle>
+        <CardDescription>A list of your clock-in/out entries for today.</CardDescription>
       </CardHeader>
       <CardContent>
         {/* Mobile View */}
@@ -83,25 +83,25 @@ export default function HistoryCard({ entries, onDelete, onUpdate }: HistoryCard
                           </div>
                           <div className="flex items-center justify-between pt-2">
                              <div className="text-sm font-mono text-primary">{formatDuration(calculateEntryDuration({clockIn: editValues.clockIn, clockOut: editValues.clockOut}))}</div>
-                             {renderEntryActions(entry, true)}
+                             {renderEntryActions(entry)}
                           </div>
                        </>
                     ) : (
                         <>
                            <div className="flex items-center justify-between">
                                 <span className="text-sm text-muted-foreground">Entry</span>
-                                {renderEntryActions(entry, true)}
+                                {renderEntryActions(entry)}
                            </div>
                            <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <LogIn className="h-4 w-4 text-green-500" />
-                                    <span className="font-medium">{formatDateTime(entry.clockIn)}</span>
+                                    <span className="font-medium">{formatTime(entry.clockIn)}</span>
                                 </div>
                            </div>
                            <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <LogOut className="h-4 w-4 text-red-500" />
-                                    <span className="font-medium">{entry.clockOut ? formatDateTime(entry.clockOut) : 'In Progress'}</span>
+                                    <span className="font-medium">{entry.clockOut ? formatTime(entry.clockOut) : 'In Progress'}</span>
                                 </div>
                                 <span className="font-mono text-sm text-primary">{formatDuration(calculateEntryDuration(entry))}</span>
                            </div>
@@ -147,8 +147,8 @@ export default function HistoryCard({ entries, onDelete, onUpdate }: HistoryCard
                         </>
                     ) : (
                         <>
-                        <TableCell>{formatDateTime(entry.clockIn)}</TableCell>
-                        <TableCell>{entry.clockOut ? formatDateTime(entry.clockOut) : 'In Progress'}</TableCell>
+                        <TableCell>{formatTime(entry.clockIn)}</TableCell>
+                        <TableCell>{entry.clockOut ? formatTime(entry.clockOut) : 'In Progress'}</TableCell>
                         <TableCell className="text-right font-mono">{formatDuration(calculateEntryDuration(entry))}</TableCell>
                         <TableCell className="text-right">
                            {renderEntryActions(entry)}
@@ -159,7 +159,7 @@ export default function HistoryCard({ entries, onDelete, onUpdate }: HistoryCard
                 ))
                 ) : (
                 <TableRow>
-                    <TableCell colSpan={4} className="text-center text-muted-foreground">No entries for today yet.</TableCell>
+                    <TableCell colSpan={4} className="text-center text-muted-foreground">No entries for the selected day.</TableCell>
                 </TableRow>
                 )}
             </TableBody>

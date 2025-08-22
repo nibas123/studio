@@ -1,5 +1,5 @@
-import { format, formatDuration as formatDurationFns, intervalToDuration, differenceInMilliseconds, isToday } from 'date-fns';
-import type { TimeEntry } from '@/types';
+import { format, intervalToDuration, differenceInMilliseconds, isSameDay, startOfDay, endOfDay } from 'date-fns';
+import type { TimeEntry, DailySummaryData, BreakEntry } from '@/types';
 
 export const formatTime = (date: Date | string): string => {
   const dt = typeof date === 'string' ? new Date(date) : date;
@@ -32,7 +32,7 @@ export const calculateTodaysWork = (
   currentTime: Date
 ): number => {
   return entries
-    .filter(entry => isToday(new Date(entry.clockIn)))
+    .filter(entry => isSameDay(new Date(entry.clockIn), currentTime))
     .reduce((total, entry) => {
       const start = new Date(entry.clockIn);
       const end = entry.clockOut ? new Date(entry.clockOut) : currentTime;
@@ -45,16 +45,17 @@ export const calculateTodaysBreak = (
     currentTime: Date
 ): number => {
     const todaysEntries = entries
-        .filter(entry => isToday(new Date(entry.clockIn)))
+        .filter(entry => isSameDay(new Date(entry.clockIn), currentTime))
         .sort((a, b) => new Date(a.clockIn).getTime() - new Date(b.clockIn).getTime());
-
+    
     if (todaysEntries.length <= 1) {
-        const isClockedIn = todaysEntries[0] ? todaysEntries[0].clockOut === null : false;
-        if (isClockedIn || todaysEntries.length === 0) {
-            return 0; // No breaks if only one entry and clocked in, or no entries
-        }
         // If there's one entry and it's completed, the break is from clock-out to now
-        return differenceInMilliseconds(currentTime, new Date(todaysEntries[0].clockOut!));
+        if (todaysEntries[0] && todaysEntries[0].clockOut) {
+          const lastClockOut = new Date(todaysEntries[0].clockOut);
+          // Only count break time if it's on the same day
+          return isSameDay(lastClockOut, currentTime) ? differenceInMilliseconds(currentTime, lastClockOut) : 0;
+        }
+        return 0; // No breaks if only one entry and still clocked in, or no entries
     }
     
     let totalBreak = 0;
@@ -72,7 +73,10 @@ export const calculateTodaysBreak = (
 
     // If currently clocked out, add the time since the last clock out
     if (!isClockedIn) {
-        totalBreak += differenceInMilliseconds(currentTime, new Date(lastEntry.clockOut!));
+        const lastClockOut = new Date(lastEntry.clockOut!);
+        if (isSameDay(lastClockOut, currentTime)) {
+           totalBreak += differenceInMilliseconds(currentTime, lastClockOut);
+        }
     }
 
     return totalBreak;
@@ -84,3 +88,70 @@ export const calculateEntryDuration = (entry: { clockIn: string; clockOut: strin
   const end = new Date(entry.clockOut);
   return differenceInMilliseconds(end, start);
 }
+
+
+export const calculateDailySummary = (allEntries: TimeEntry[], date: Date): DailySummaryData => {
+  const entriesForDay = allEntries
+    .filter(entry => isSameDay(new Date(entry.clockIn), date))
+    .sort((a, b) => new Date(a.clockIn).getTime() - new Date(b.clockIn).getTime());
+
+  if (entriesForDay.length === 0) {
+    return {
+      totalWork: 0,
+      totalBreak: 0,
+      firstClockIn: null,
+      lastClockOut: null,
+      breaks: [],
+      workPercentage: 0,
+      breakPercentage: 0,
+      entries: [],
+    };
+  }
+
+  let totalWork = 0;
+  const breaks: BreakEntry[] = [];
+
+  entriesForDay.forEach((entry, index) => {
+    if (entry.clockOut) {
+      totalWork += differenceInMilliseconds(new Date(entry.clockOut), new Date(entry.clockIn));
+      
+      // Calculate break after this entry
+      const nextEntry = entriesForDay[index + 1];
+      if (nextEntry) {
+        const breakStart = new Date(entry.clockOut);
+        const breakEnd = new Date(nextEntry.clockIn);
+        const duration = differenceInMilliseconds(breakEnd, breakStart);
+        if (duration > 0) {
+          breaks.push({
+            start: breakStart.toISOString(),
+            end: breakEnd.toISOString(),
+            duration: duration,
+          });
+        }
+      }
+    } else {
+      // If still clocked in, count work until now (if it's today)
+      if (isSameDay(date, new Date())) {
+        totalWork += differenceInMilliseconds(new Date(), new Date(entry.clockIn));
+      }
+    }
+  });
+
+  const totalBreak = breaks.reduce((sum, b) => sum + b.duration, 0);
+  const totalTime = totalWork + totalBreak;
+  
+  const firstClockIn = entriesForDay[0].clockIn;
+  const lastCompletedEntry = [...entriesForDay].reverse().find(e => e.clockOut);
+  const lastClockOut = lastCompletedEntry ? lastCompletedEntry.clockOut : null;
+  
+  return {
+    totalWork,
+    totalBreak,
+    firstClockIn,
+    lastClockOut,
+    breaks,
+    workPercentage: totalTime > 0 ? Math.round((totalWork / totalTime) * 100) : 0,
+    breakPercentage: totalTime > 0 ? Math.round((totalBreak / totalTime) * 100) : 0,
+    entries: entriesForDay,
+  };
+};

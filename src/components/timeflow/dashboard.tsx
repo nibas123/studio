@@ -9,8 +9,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 import AppHeader from './header';
 import ClockCard from './clock-card';
-import HistoryCard from './history-card';
 import AiAlert from './ai-alert';
+import DailySummary from './daily-summary';
 
 export default function Dashboard() {
   const [settings, setSettings] = useLocalStorage<AppSettings>('timeflow-settings', {
@@ -18,6 +18,7 @@ export default function Dashboard() {
   });
   const [allEntries, setAllEntries] = useLocalStorage<TimeEntry[]>('timeflow-entries', []);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -25,10 +26,6 @@ export default function Dashboard() {
     }, 1000);
     return () => clearInterval(timer);
   }, []);
-
-  const todaysEntries = useMemo(() => {
-    return allEntries.filter(entry => isToday(new Date(entry.clockIn))).sort((a, b) => new Date(b.clockIn).getTime() - new Date(a.clockIn).getTime());
-  }, [allEntries]);
 
   const currentEntry = useMemo(() => {
     return allEntries.find(entry => entry.clockOut === null);
@@ -100,19 +97,36 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col h-full">
-      <AppHeader onSaveSettings={setSettings} settings={settings} onSaveManualEntry={handleSaveManualEntry} isClockedIn={isClockedIn} onResetData={handleResetData} />
+      <AppHeader 
+        onSaveSettings={setSettings} 
+        settings={settings} 
+        onSaveManualEntry={handleSaveManualEntry} 
+        isClockedIn={isClockedIn} 
+        onResetData={handleResetData}
+        selectedDate={selectedDate}
+        onDateChange={setSelectedDate}
+      />
       <main className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
-        <ClockCard
-            currentTime={currentTime}
-            isClockedIn={isClockedIn}
-            onClockIn={handleClockIn}
-            onClockOut={handleClockOut}
-            totalWorkTodayMs={totalWorkTodayMs}
-            totalBreakTodayMs={totalBreakTodayMs}
-            dailyLimitHours={settings.dailyWorkHourLimit}
-            clockInTime={currentEntry?.clockIn}
+        {isToday(selectedDate) ? (
+          <ClockCard
+              currentTime={currentTime}
+              isClockedIn={isClockedIn}
+              onClockIn={handleClockIn}
+              onClockOut={handleClockOut}
+              totalWorkTodayMs={totalWorkTodayMs}
+              totalBreakTodayMs={totalBreakTodayMs}
+              dailyLimitHours={settings.dailyWorkHourLimit}
+              clockInTime={currentEntry?.clockIn}
+          />
+        ) : <div className="text-center p-4 bg-card/50 rounded-lg shadow-lg border-none">Viewing summary for a past day. Clock actions are disabled.</div>}
+        
+        <DailySummary 
+          entries={allEntries} 
+          selectedDate={selectedDate} 
+          onDelete={handleDeleteEntry}
+          onUpdate={handleUpdateEntry}
         />
-        <HistoryCard entries={todaysEntries} onDelete={handleDeleteEntry} onUpdate={handleUpdateEntry} />
+
         {isClockedIn && <AiAlert allEntries={allEntries} settings={settings} onClockOut={handleClockOut} />}
       </main>
     </div>
