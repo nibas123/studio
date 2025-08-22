@@ -50,10 +50,17 @@ export default function ManualEntryDialog({ children, onSave, isClockedIn }: Man
   });
 
   useEffect(() => {
+    if (isClockedIn) {
       form.reset({
-        clockIn: !isClockedIn ? toLocalISOString(new Date()) : undefined,
-        clockOut: isClockedIn ? toLocalISOString(new Date()) : undefined,
+        clockIn: undefined,
+        clockOut: toLocalISOString(new Date()),
       });
+    } else {
+      form.reset({
+        clockIn: toLocalISOString(new Date()),
+        clockOut: toLocalISOString(new Date()),
+      });
+    }
   }, [isClockedIn, form]);
 
 
@@ -62,15 +69,31 @@ export default function ManualEntryDialog({ children, onSave, isClockedIn }: Man
   }
 
   return (
-    <Dialog onOpenChange={(open) => !open && form.reset()}>
+    <Dialog onOpenChange={(open) => {
+      if (!open) {
+        form.reset();
+      } else {
+        if (isClockedIn) {
+          form.reset({
+            clockIn: undefined,
+            clockOut: toLocalISOString(new Date()),
+          });
+        } else {
+          form.reset({
+            clockIn: toLocalISOString(new Date()),
+            clockOut: toLocalISOString(new Date()),
+          });
+        }
+      }
+    }}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Manual Time Entry</DialogTitle>
           <DialogDescription>
             {isClockedIn 
-              ? "You are currently clocked in. Add a clock out time."
-              : "Forgot to clock in or out? Add your entry here."
+              ? "You are currently clocked in. Add a clock out time to complete your entry."
+              : "Forgot to clock in or out? Add your new entry here."
             }
           </DialogDescription>
         </DialogHeader>
