@@ -47,32 +47,35 @@ export const calculateTodaysBreak = (
     const todaysEntries = entries
         .filter(entry => isToday(new Date(entry.clockIn)))
         .sort((a, b) => new Date(a.clockIn).getTime() - new Date(b.clockIn).getTime());
-    
-    if (todaysEntries.length === 0) {
-        return 0;
+
+    if (todaysEntries.length <= 1) {
+        const isClockedIn = todaysEntries[0] ? todaysEntries[0].clockOut === null : false;
+        if (isClockedIn || todaysEntries.length === 0) {
+            return 0; // No breaks if only one entry and clocked in, or no entries
+        }
+        // If there's one entry and it's completed, the break is from clock-out to now
+        return differenceInMilliseconds(currentTime, new Date(todaysEntries[0].clockOut!));
     }
     
-    const isClockedIn = todaysEntries[todaysEntries.length - 1].clockOut === null;
-    
-    const completedEntries = todaysEntries.filter(entry => entry.clockOut);
-
-    let breakTime = 0;
+    let totalBreak = 0;
     // Calculate breaks between completed entries
-    if (completedEntries.length > 1) {
-        for (let i = 0; i < completedEntries.length - 1; i++) {
-            const currentClockOut = new Date(completedEntries[i].clockOut!);
-            const nextClockIn = new Date(completedEntries[i+1].clockIn);
-            breakTime += differenceInMilliseconds(nextClockIn, currentClockOut);
+    for (let i = 0; i < todaysEntries.length - 1; i++) {
+        const currentEntry = todaysEntries[i];
+        const nextEntry = todaysEntries[i+1];
+        if (currentEntry.clockOut) {
+            totalBreak += differenceInMilliseconds(new Date(nextEntry.clockIn), new Date(currentEntry.clockOut));
         }
     }
 
-    // If not clocked in, and there's at least one completed entry, calculate current break time
-    if (!isClockedIn && completedEntries.length > 0) {
-        const lastClockOut = new Date(completedEntries[completedEntries.length - 1].clockOut!);
-        breakTime += differenceInMilliseconds(currentTime, lastClockOut);
+    const lastEntry = todaysEntries[todaysEntries.length - 1];
+    const isClockedIn = lastEntry.clockOut === null;
+
+    // If currently clocked out, add the time since the last clock out
+    if (!isClockedIn) {
+        totalBreak += differenceInMilliseconds(currentTime, new Date(lastEntry.clockOut!));
     }
 
-    return breakTime;
+    return totalBreak;
 }
 
 export const calculateEntryDuration = (entry: { clockIn: string; clockOut: string | null }): number => {
