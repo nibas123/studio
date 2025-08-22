@@ -71,11 +71,11 @@ export default function Dashboard() {
               : e
           )
         );
-     } else if (!isClockedIn && entry.clockIn && entry.clockOut) {
+     } else if (!isClockedIn && entry.clockIn) {
         const newEntry: TimeEntry = {
             id: uuidv4(),
             clockIn: new Date(entry.clockIn).toISOString(),
-            clockOut: new Date(entry.clockOut).toISOString(),
+            clockOut: null,
         };
         setAllEntries(prev => [...prev, newEntry]);
      }
