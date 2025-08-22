@@ -5,12 +5,12 @@ import { useState, useEffect, useMemo } from 'react';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import type { TimeEntry, AppSettings } from '@/types';
 import { calculateTodaysWork, calculateTodaysBreak } from '@/lib/time';
-import { isToday } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 
 import AppHeader from './header';
 import ClockCard from './clock-card';
 import AiAlert from './ai-alert';
+import EndDayDialog from './end-day-dialog';
 
 export default function Dashboard() {
   const [settings, setSettings] = useLocalStorage<AppSettings>('timeflow-settings', {
@@ -19,6 +19,7 @@ export default function Dashboard() {
   const [allEntries, setAllEntries] = useLocalStorage<TimeEntry[]>('timeflow-entries', []);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [showEndDayDialog, setShowEndDayDialog] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -61,6 +62,22 @@ export default function Dashboard() {
       )
     );
   };
+
+  const handleEndDay = () => {
+    if (!currentEntry) return;
+    
+    // Perform the final clock out
+    setAllEntries(prev =>
+      prev.map(entry =>
+        entry.id === currentEntry.id
+          ? { ...entry, clockOut: new Date().toISOString() }
+          : entry
+      )
+    );
+
+    // Show the summary/download dialog
+    setShowEndDayDialog(true);
+  };
   
   const handleSaveManualEntry = (entry: { clockIn?: string; clockOut?: string }) => {
      if (isClockedIn && entry.clockOut && currentEntry) {
@@ -75,7 +92,7 @@ export default function Dashboard() {
         const newEntry: TimeEntry = {
             id: uuidv4(),
             clockIn: new Date(entry.clockIn).toISOString(),
-            clockOut: null,
+            clockOut: entry.clockOut ? new Date(entry.clockOut).toISOString() : null,
         };
         setAllEntries(prev => [...prev, newEntry]);
      }
@@ -105,6 +122,7 @@ export default function Dashboard() {
               isClockedIn={isClockedIn}
               onClockIn={handleClockIn}
               onClockOut={handleClockOut}
+              onEndDay={handleEndDay}
               totalWorkTodayMs={totalWorkTodayMs}
               totalBreakTodayMs={totalBreakTodayMs}
               dailyLimitHours={settings.dailyWorkHourLimit}
@@ -112,6 +130,15 @@ export default function Dashboard() {
           />
         
         {isClockedIn && <AiAlert allEntries={allEntries} settings={settings} onClockOut={handleClockOut} />}
+
+        {showEndDayDialog && (
+          <EndDayDialog
+            isOpen={showEndDayDialog}
+            onClose={() => setShowEndDayDialog(false)}
+            entries={allEntries}
+            selectedDate={new Date()}
+          />
+        )}
       </main>
     </div>
   );

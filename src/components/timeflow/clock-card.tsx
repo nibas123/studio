@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Clock, LogIn, LogOut, Coffee } from 'lucide-react';
+import { Clock, LogIn, LogOut, DoorOpen } from 'lucide-react';
 import { formatTime, formatDuration } from '@/lib/time';
 
 interface ClockCardProps {
@@ -10,6 +10,7 @@ interface ClockCardProps {
   isClockedIn: boolean;
   onClockIn: () => void;
   onClockOut: () => void;
+  onEndDay: () => void;
   totalWorkTodayMs: number;
   totalBreakTodayMs: number;
   dailyLimitHours: number;
@@ -21,6 +22,7 @@ export default function ClockCard({
   isClockedIn,
   onClockIn,
   onClockOut,
+  onEndDay,
   totalWorkTodayMs,
   totalBreakTodayMs,
   dailyLimitHours,
@@ -56,22 +58,37 @@ export default function ClockCard({
             )}
         </div>
 
-        <Button
-          size="lg"
-          className="w-56 h-16 text-xl rounded-full shadow-lg transition-transform transform hover:scale-105"
-          onClick={isClockedIn ? onClockOut : onClockIn}
-          variant={isClockedIn ? 'destructive' : 'default'}
-        >
-          {isClockedIn ? (
-            <>
-              <LogOut className="mr-3 h-7 w-7" /> Clock Out
-            </>
-          ) : (
-            <>
-              <LogIn className="mr-3 h-7 w-7" /> Clock In
-            </>
-          )}
-        </Button>
+        <div className="flex flex-col sm:flex-row items-center gap-4">
+            {!isClockedIn ? (
+                 <Button
+                    size="lg"
+                    className="w-56 h-16 text-xl rounded-full shadow-lg transition-transform transform hover:scale-105"
+                    onClick={onClockIn}
+                >
+                    <LogIn className="mr-3 h-7 w-7" /> Clock In
+                </Button>
+            ) : (
+                <>
+                    <Button
+                        size="lg"
+                        className="w-56 h-16 text-xl rounded-full shadow-lg transition-transform transform hover:scale-105"
+                        onClick={onClockOut}
+                        variant="destructive"
+                    >
+                        <LogOut className="mr-3 h-7 w-7" /> Clock Out
+                    </Button>
+                     <Button
+                        size="lg"
+                        className="w-56 h-16 text-xl rounded-full shadow-lg transition-transform transform hover:scale-105"
+                        onClick={onEndDay}
+                        variant="secondary"
+                    >
+                        <DoorOpen className="mr-3 h-7 w-7" /> End Day
+                    </Button>
+                </>
+            )}
+        </div>
+
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 w-full text-center pt-6 max-w-3xl mx-auto">
           <div className="bg-background/50 p-4 rounded-lg">

@@ -12,13 +12,19 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogClose,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useEffect, useState } from 'react';
 
-const formSchema = z.object({
-  time: z.string().nonempty({ message: "Time is required." }),
+const clockInSchema = z.object({
+  clockIn: z.string().nonempty({ message: "Time is required." }),
+  clockOut: z.string().optional(),
+});
+
+const clockOutSchema = z.object({
+    clockOut: z.string().nonempty({ message: "Time is required." }),
 });
 
 
@@ -37,37 +43,36 @@ const toLocalISOString = (date: Date) => {
 export default function ManualEntryDialog({ children, onSave, isClockedIn }: ManualEntryDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm({
+    resolver: zodResolver(isClockedIn ? clockOutSchema : clockInSchema),
     defaultValues: {
-      time: '',
+      clockIn: '',
+      clockOut: '',
     },
   });
   
   useEffect(() => {
     if(isOpen) {
-      form.reset({
-          time: toLocalISOString(new Date()),
-      });
+      const now = toLocalISOString(new Date());
+      if (isClockedIn) {
+          form.reset({ clockOut: now });
+      } else {
+          form.reset({ clockIn: now, clockOut: now });
+      }
     }
-  }, [isOpen, form]);
+  }, [isOpen, isClockedIn, form]);
 
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    if (isClockedIn) {
-        onSave({ clockOut: values.time });
-    } else {
-        onSave({ clockIn: values.time });
-    }
+  function onSubmit(values: any) {
+    onSave(values);
     setIsOpen(false);
   }
-
-  const title = isClockedIn ? "Manual Clock Out" : "Manual Clock In";
+  
+  const title = isClockedIn ? "Manual Clock Out" : "Manual Time Entry";
   const description = isClockedIn 
-    ? "You are currently clocked in. Enter a clock out time to complete your current entry."
-    : "You are currently clocked out. Enter a clock in time to start a new entry.";
-  const label = isClockedIn ? "Clock Out Time" : "Clock In Time";
-
+    ? "You are currently clocked in. Enter a clock out time to complete your current session."
+    : "Forgot to record a work session? Add a complete entry here.";
+  
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
@@ -80,12 +85,27 @@ export default function ManualEntryDialog({ children, onSave, isClockedIn }: Man
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+            {!isClockedIn && (
+                 <FormField
+                    control={form.control}
+                    name="clockIn"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Clock In</FormLabel>
+                        <FormControl>
+                        <Input type="datetime-local" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+            )}
             <FormField
                 control={form.control}
-                name="time"
+                name="clockOut"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{label}</FormLabel>
+                    <FormLabel>Clock Out</FormLabel>
                     <FormControl>
                       <Input type="datetime-local" {...field} />
                     </FormControl>
@@ -94,6 +114,9 @@ export default function ManualEntryDialog({ children, onSave, isClockedIn }: Man
                 )}
               />
             <DialogFooter>
+                <DialogClose asChild>
+                    <Button type="button" variant="secondary">Close</Button>
+                </DialogClose>
                 <Button type="submit">Save Entry</Button>
             </DialogFooter>
           </form>
