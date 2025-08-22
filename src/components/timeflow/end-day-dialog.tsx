@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import DailySummary from './daily-summary';
 import type { TimeEntry } from '@/types';
 import jsPDF from 'jspdf';
-import { calculateDailySummary, formatTime, formatDuration, formatDate } from '@/lib/time';
+import { calculateDailySummary, formatTime, formatDuration, formatDate, calculateEntryDuation } from '@/lib/time';
 
 interface EndDayDialogProps {
   isOpen: boolean;
@@ -104,7 +104,7 @@ export default function EndDayDialog({ isOpen, onClose, entries, selectedDate }:
           </DialogDescription>
         </DialogHeader>
         
-        <div className="max-h-[60vh] overflow-y-auto p-1">
+         <div className="max-h-[60vh] overflow-y-auto p-1">
              <div className="p-4 light bg-white text-black">
                 <DailySummary entries={entries} selectedDate={selectedDate} />
              </div>
@@ -118,4 +118,3 @@ export default function EndDayDialog({ isOpen, onClose, entries, selectedDate }:
     </Dialog>
   );
 }
-
