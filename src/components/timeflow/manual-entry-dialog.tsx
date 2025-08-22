@@ -12,7 +12,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogClose,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -52,17 +51,11 @@ export default function ManualEntryDialog({ children, onSave, isClockedIn }: Man
   });
   
   const resetForm = () => {
-    if (isClockedIn) {
-      form.reset({
-        clockIn: undefined,
-        clockOut: toLocalISOString(new Date()),
-      });
-    } else {
-      form.reset({
-        clockIn: toLocalISOString(new Date()),
-        clockOut: toLocalISOString(new Date()),
-      });
-    }
+    const now = toLocalISOString(new Date());
+    form.reset({
+      clockIn: isClockedIn ? undefined : now,
+      clockOut: now,
+    });
   }
 
   useEffect(() => {
