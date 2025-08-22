@@ -7,16 +7,11 @@ import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { calculateDailySummary, formatDuration, formatTime } from '@/lib/time';
 import { Progress } from '@/components/ui/progress';
-import { Separator } from '@/components/ui/separator';
 import { Briefcase, Coffee, ArrowRight, Clock } from 'lucide-react';
-import HistoryCard from './history-card';
-
 
 interface DailySummaryProps {
   entries: TimeEntry[];
   selectedDate: Date;
-  onUpdate: (entry: TimeEntry) => void;
-  onDelete: (id: string) => void;
 }
 
 const SummaryItem = ({ icon, label, value, className = "" }: { icon: React.ElementType, label: string, value: string, className?: string }) => (
@@ -30,7 +25,7 @@ const SummaryItem = ({ icon, label, value, className = "" }: { icon: React.Eleme
 );
 
 
-export default function DailySummary({ entries, selectedDate, onUpdate, onDelete }: DailySummaryProps) {
+export default function DailySummary({ entries, selectedDate }: DailySummaryProps) {
   const summary = useMemo(() => calculateDailySummary(entries, selectedDate), [entries, selectedDate]);
 
   if (summary.entries.length === 0) {
@@ -95,9 +90,6 @@ export default function DailySummary({ entries, selectedDate, onUpdate, onDelete
                 )}
             </CardContent>
         </Card>
-
-        {/* Entries Table */}
-        <HistoryCard entries={summary.entries} onDelete={onDelete} onUpdate={onUpdate} />
     </div>
   );
 }

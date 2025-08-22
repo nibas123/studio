@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { TimeEntry } from '@/types';
@@ -59,8 +60,8 @@ export default function HistoryCard({ entries, onDelete, onUpdate }: HistoryCard
   return (
     <Card className="shadow-lg border-none bg-card/50">
       <CardHeader>
-        <CardTitle>Today's Entries</CardTitle>
-        <CardDescription>A list of your clock-in/out entries for today.</CardDescription>
+        <CardTitle>Time Entries</CardTitle>
+        <CardDescription>A list of your clock-in/out entries for the selected day.</CardDescription>
       </CardHeader>
       <CardContent>
         {/* Mobile View */}
@@ -111,7 +112,7 @@ export default function HistoryCard({ entries, onDelete, onUpdate }: HistoryCard
               ))}
             </div>
           ) : (
-             <p className="text-center text-muted-foreground py-4">No entries for today yet.</p>
+             <p className="text-center text-muted-foreground py-4">No entries for this day yet.</p>
           )}
         </div>
 

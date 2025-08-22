@@ -2,6 +2,8 @@
 'use client';
 
 import * as React from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import {
   SidebarProvider,
   Sidebar,
@@ -12,12 +14,18 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarFooter,
 } from '@/components/ui/sidebar';
-import { Timer, History } from 'lucide-react';
+import { Timer, History, LayoutDashboard } from 'lucide-react';
 import { ThemeToggle } from './theme-toggle';
 
+const navItems = [
+    { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/summary', label: 'Summary', icon: Timer },
+    { href: '/history', label: 'History', icon: History },
+];
+
 export default function AppLayout({ children }: { children: React.ReactNode }) {
+    const pathname = usePathname();
   return (
     <SidebarProvider>
       <Sidebar>
@@ -34,12 +42,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </SidebarHeader>
         <SidebarContent>
           <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton tooltip="Dashboard" isActive>
-                <Timer />
-                <span>Dashboard</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
+            {navItems.map((item) => (
+                 <SidebarMenuItem key={item.href} asChild>
+                    <Link href={item.href}>
+                        <SidebarMenuButton tooltip={item.label} isActive={pathname === item.href}>
+                            <item.icon />
+                            <span>{item.label}</span>
+                        </SidebarMenuButton>
+                    </Link>
+                 </SidebarMenuItem>
+            ))}
           </SidebarMenu>
         </SidebarContent>
       </Sidebar>

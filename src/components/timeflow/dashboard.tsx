@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useMemo } from 'react';
@@ -10,7 +11,6 @@ import { v4 as uuidv4 } from 'uuid';
 import AppHeader from './header';
 import ClockCard from './clock-card';
 import AiAlert from './ai-alert';
-import DailySummary from './daily-summary';
 
 export default function Dashboard() {
   const [settings, setSettings] = useLocalStorage<AppSettings>('timeflow-settings', {
@@ -81,14 +81,6 @@ export default function Dashboard() {
      }
   };
 
-  const handleDeleteEntry = (id: string) => {
-    setAllEntries(prev => prev.filter(entry => entry.id !== id));
-  };
-  
-  const handleUpdateEntry = (updatedEntry: TimeEntry) => {
-    setAllEntries(prev => prev.map(entry => entry.id === updatedEntry.id ? updatedEntry : entry));
-  };
-  
   const handleResetData = () => {
     setAllEntries([]);
     setSettings({ dailyWorkHourLimit: 8 });
@@ -105,9 +97,9 @@ export default function Dashboard() {
         onResetData={handleResetData}
         selectedDate={selectedDate}
         onDateChange={setSelectedDate}
+        showDatePicker={false}
       />
       <main className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
-        {isToday(selectedDate) ? (
           <ClockCard
               currentTime={currentTime}
               isClockedIn={isClockedIn}
@@ -118,15 +110,7 @@ export default function Dashboard() {
               dailyLimitHours={settings.dailyWorkHourLimit}
               clockInTime={currentEntry?.clockIn}
           />
-        ) : <div className="text-center p-4 bg-card/50 rounded-lg shadow-lg border-none">Viewing summary for a past day. Clock actions are disabled.</div>}
         
-        <DailySummary 
-          entries={allEntries} 
-          selectedDate={selectedDate} 
-          onDelete={handleDeleteEntry}
-          onUpdate={handleUpdateEntry}
-        />
-
         {isClockedIn && <AiAlert allEntries={allEntries} settings={settings} onClockOut={handleClockOut} />}
       </main>
     </div>

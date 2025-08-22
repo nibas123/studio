@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { AppSettings } from '@/types';
@@ -32,31 +33,34 @@ interface AppHeaderProps {
   onResetData: () => void;
   selectedDate: Date;
   onDateChange: (date: Date) => void;
+  showDatePicker?: boolean;
 }
 
-export default function AppHeader({ settings, onSaveSettings, onSaveManualEntry, isClockedIn, onResetData, selectedDate, onDateChange }: AppHeaderProps) {
+export default function AppHeader({ settings, onSaveSettings, onSaveManualEntry, isClockedIn, onResetData, selectedDate, onDateChange, showDatePicker = true }: AppHeaderProps) {
   const { isMobile } = useSidebar();
   
   return (
     <header className="flex items-center justify-between p-4 border-b">
       <div className="flex items-center gap-2">
         {isMobile && <SidebarTrigger />}
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" className="w-[240px] justify-start text-left font-normal">
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {formatDate(selectedDate)}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              selected={selectedDate}
-              onSelect={(date) => date && onDateChange(date)}
-              initialFocus
-            />
-          </PopoverContent>
-        </Popover>
+        {showDatePicker && (
+            <Popover>
+            <PopoverTrigger asChild>
+                <Button variant="outline" className="w-[240px] justify-start text-left font-normal">
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {formatDate(selectedDate)}
+                </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={(date) => date && onDateChange(date)}
+                initialFocus
+                />
+            </PopoverContent>
+            </Popover>
+        )}
       </div>
       <div className="flex items-center gap-2">
         <ManualEntryDialog onSave={onSaveManualEntry} isClockedIn={isClockedIn}>
