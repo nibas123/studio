@@ -48,8 +48,8 @@ export default function ManualEntryDialog({ children, onSave, isClockedIn }: Man
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
-
-  useEffect(() => {
+  
+  const resetForm = () => {
     if (isClockedIn) {
       form.reset({
         clockIn: undefined,
@@ -61,6 +61,10 @@ export default function ManualEntryDialog({ children, onSave, isClockedIn }: Man
         clockOut: toLocalISOString(new Date()),
       });
     }
+  }
+
+  useEffect(() => {
+    resetForm();
   }, [isClockedIn, form]);
 
 
@@ -73,17 +77,7 @@ export default function ManualEntryDialog({ children, onSave, isClockedIn }: Man
       if (!open) {
         form.reset();
       } else {
-        if (isClockedIn) {
-          form.reset({
-            clockIn: undefined,
-            clockOut: toLocalISOString(new Date()),
-          });
-        } else {
-          form.reset({
-            clockIn: toLocalISOString(new Date()),
-            clockOut: toLocalISOString(new Date()),
-          });
-        }
+        resetForm();
       }
     }}>
       <DialogTrigger asChild>{children}</DialogTrigger>
@@ -107,7 +101,7 @@ export default function ManualEntryDialog({ children, onSave, isClockedIn }: Man
                   <FormItem>
                     <FormLabel>Clock In</FormLabel>
                     <FormControl>
-                      <Input type="datetime-local" {...field} />
+                      <Input type="datetime-local" {...field} value={field.value || ''} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -122,7 +116,7 @@ export default function ManualEntryDialog({ children, onSave, isClockedIn }: Man
                 <FormItem>
                   <FormLabel>Clock Out</FormLabel>
                   <FormControl>
-                    <Input type="datetime-local" {...field} />
+                    <Input type="datetime-local" {...field} value={field.value || ''} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

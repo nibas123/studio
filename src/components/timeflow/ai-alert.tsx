@@ -18,12 +18,13 @@ import { useToast } from '@/hooks/use-toast';
 interface AiAlertProps {
   allEntries: TimeEntry[];
   settings: AppSettings;
+  onClockOut: () => void;
 }
 
 // Check every 10 minutes
 const CHECK_INTERVAL = 1000 * 60 * 10;
 
-export default function AiAlert({ allEntries, settings }: AiAlertProps) {
+export default function AiAlert({ allEntries, settings, onClockOut }: AiAlertProps) {
   const [showAlert, setShowAlert] = useState(false);
   const { toast } = useToast();
 
@@ -70,6 +71,11 @@ export default function AiAlert({ allEntries, settings }: AiAlertProps) {
     return () => clearInterval(intervalId);
   }, [allEntries, settings, toast]);
 
+  const handleClockOut = () => {
+    onClockOut();
+    setShowAlert(false);
+  }
+
   return (
     <AlertDialog open={showAlert} onOpenChange={setShowAlert}>
       <AlertDialogContent>
@@ -82,8 +88,7 @@ export default function AiAlert({ allEntries, settings }: AiAlertProps) {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>No, I'm still working</AlertDialogCancel>
-          {/* This would require passing down the clockout function */}
-          <AlertDialogAction disabled>Clock Out Now</AlertDialogAction>
+          <AlertDialogAction onClick={handleClockOut}>Clock Out Now</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

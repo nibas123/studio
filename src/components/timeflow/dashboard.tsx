@@ -108,7 +108,7 @@ export default function Dashboard() {
             clockInTime={currentEntry?.clockIn}
         />
         <HistoryCard entries={todaysEntries} onDelete={handleDeleteEntry} onUpdate={handleUpdateEntry} />
-        {isClockedIn && <AiAlert allEntries={allEntries} settings={settings} />}
+        {isClockedIn && <AiAlert allEntries={allEntries} settings={settings} onClockOut={handleClockOut} />}
       </main>
     </div>
   );
