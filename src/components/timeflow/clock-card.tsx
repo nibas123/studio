@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Clock, LogIn, LogOut } from 'lucide-react';
+import { Clock, LogIn, LogOut, Coffee } from 'lucide-react';
 import { formatTime, formatDuration } from '@/lib/time';
 
 interface ClockCardProps {
@@ -11,6 +11,7 @@ interface ClockCardProps {
   onClockIn: () => void;
   onClockOut: () => void;
   totalWorkTodayMs: number;
+  totalBreakTodayMs: number;
   dailyLimitHours: number;
   clockInTime?: string;
 }
@@ -21,6 +22,7 @@ export default function ClockCard({
   onClockIn,
   onClockOut,
   totalWorkTodayMs,
+  totalBreakTodayMs,
   dailyLimitHours,
   clockInTime,
 }: ClockCardProps) {
@@ -71,7 +73,7 @@ export default function ClockCard({
           )}
         </Button>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full text-center pt-6 max-w-2xl mx-auto">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 w-full text-center pt-6 max-w-3xl mx-auto">
           <div className="bg-background/50 p-4 rounded-lg">
             <p className="text-sm text-muted-foreground uppercase tracking-wider">Time Left</p>
             <p className={`text-2xl sm:text-3xl font-bold font-mono ${remainingTimeMs < 0 ? 'text-muted-foreground' : 'text-primary'}`}>
@@ -81,6 +83,10 @@ export default function ClockCard({
           <div className="bg-background/50 p-4 rounded-lg">
             <p className="text-sm text-muted-foreground uppercase tracking-wider">Time Worked</p>
             <p className="text-2xl sm:text-3xl font-bold font-mono">{formatDuration(totalWorkTodayMs)}</p>
+          </div>
+          <div className="bg-background/50 p-4 rounded-lg">
+            <p className="text-sm text-muted-foreground uppercase tracking-wider">Break</p>
+            <p className="text-2xl sm:text-3xl font-bold font-mono">{formatDuration(totalBreakTodayMs)}</p>
           </div>
           <div className="bg-background/50 p-4 rounded-lg">
             <p className="text-sm text-muted-foreground uppercase tracking-wider">Overtime</p>

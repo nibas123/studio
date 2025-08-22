@@ -1,4 +1,5 @@
 import { format, formatDuration as formatDurationFns, intervalToDuration, differenceInMilliseconds, isToday } from 'date-fns';
+import type { TimeEntry } from '@/types';
 
 export const formatTime = (date: Date | string): string => {
   const dt = typeof date === 'string' ? new Date(date) : date;
@@ -27,7 +28,7 @@ export const formatDuration = (milliseconds: number): string => {
 };
 
 export const calculateTodaysWork = (
-  entries: { clockIn: string; clockOut: string | null }[],
+  entries: TimeEntry[],
   currentTime: Date
 ): number => {
   return entries
@@ -38,6 +39,27 @@ export const calculateTodaysWork = (
       return total + differenceInMilliseconds(end, start);
     }, 0);
 };
+
+export const calculateTodaysBreak = (
+    entries: TimeEntry[]
+): number => {
+    const todaysCompletedEntries = entries
+        .filter(entry => entry.clockOut && isToday(new Date(entry.clockIn)))
+        .sort((a, b) => new Date(a.clockIn).getTime() - new Date(b.clockIn).getTime());
+
+    if (todaysCompletedEntries.length < 2) {
+        return 0;
+    }
+
+    let breakTime = 0;
+    for (let i = 0; i < todaysCompletedEntries.length - 1; i++) {
+        const currentClockOut = new Date(todaysCompletedEntries[i].clockOut!);
+        const nextClockIn = new Date(todaysCompletedEntries[i+1].clockIn);
+        breakTime += differenceInMilliseconds(nextClockIn, currentClockOut);
+    }
+
+    return breakTime;
+}
 
 export const calculateEntryDuration = (entry: { clockIn: string; clockOut: string | null }): number => {
   if (!entry.clockOut) return 0;

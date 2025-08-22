@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import type { TimeEntry, AppSettings } from '@/types';
-import { calculateTodaysWork } from '@/lib/time';
+import { calculateTodaysWork, calculateTodaysBreak } from '@/lib/time';
 import { isToday } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -39,6 +39,10 @@ export default function Dashboard() {
   const totalWorkTodayMs = useMemo(() => {
     return calculateTodaysWork(allEntries, currentTime);
   }, [allEntries, currentTime]);
+  
+  const totalBreakTodayMs = useMemo(() => {
+    return calculateTodaysBreak(allEntries);
+  }, [allEntries]);
 
   const handleClockIn = () => {
     if (isClockedIn) return;
@@ -104,6 +108,7 @@ export default function Dashboard() {
             onClockIn={handleClockIn}
             onClockOut={handleClockOut}
             totalWorkTodayMs={totalWorkTodayMs}
+            totalBreakTodayMs={totalBreakTodayMs}
             dailyLimitHours={settings.dailyWorkHourLimit}
             clockInTime={currentEntry?.clockIn}
         />
