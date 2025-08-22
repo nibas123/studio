@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import DailySummary from './daily-summary';
 import type { TimeEntry } from '@/types';
 import jsPDF from 'jspdf';
+import { calculateDailySummary, formatTime, formatDuration, formatDate } from '@/lib/time';
 
 interface EndDayDialogProps {
   isOpen: boolean;
@@ -23,30 +24,48 @@ interface EndDayDialogProps {
 }
 
 export default function EndDayDialog({ isOpen, onClose, entries, selectedDate }: EndDayDialogProps) {
-    const summaryRef = React.useRef<HTMLDivElement>(null);
-
+    
     const handleDownloadPdf = () => {
-        const content = summaryRef.current;
-        if (!content) return;
+        const summary = calculateDailySummary(entries, selectedDate);
+        const doc = new jsPDF();
 
-        const doc = new jsPDF({
-            orientation: 'p',
-            unit: 'px',
-            format: 'a4'
-        });
+        doc.setFontSize(18);
+        doc.text(`Daily Summary - ${formatDate(selectedDate)}`, 14, 22);
+
+        doc.setFontSize(12);
+        doc.text(`Total Work: ${formatDuration(summary.totalWork)}`, 14, 32);
+        doc.text(`Total Break: ${formatDuration(summary.totalBreak)}`, 14, 40);
+        doc.text(`First Clock-In: ${summary.firstClockIn ? formatTime(summary.firstClockIn) : 'N/A'}`, 14, 48);
+        doc.text(`Last Clock-Out: ${summary.lastClockOut ? formatTime(summary.lastClockOut) : 'N/A'}`, 14, 56);
         
-        doc.html(content, {
-            callback: function (doc) {
-                doc.save(`TimeFlow-Summary-${selectedDate.toISOString().split('T')[0]}.pdf`);
-            },
-            x: 10,
-            y: 10,
-            html2canvas: {
-                scale: 0.2, // Adjust scale to fit content on the page
-                backgroundColor: '#ffffff'
-            },
-            margin: [10, 10, 10, 10]
-        });
+        if (summary.entries.length > 0) {
+            doc.setFontSize(14);
+            doc.text("Entries:", 14, 70);
+            let y = 78;
+            summary.entries.forEach(entry => {
+                doc.setFontSize(10);
+                const clockIn = `IN: ${formatTime(entry.clockIn)}`;
+                const clockOut = entry.clockOut ? `OUT: ${formatTime(entry.clockOut)}` : 'OUT: In Progress';
+                doc.text(`${clockIn} - ${clockOut}`, 14, y);
+                y += 6;
+            });
+        }
+
+        if (summary.breaks.length > 0) {
+            doc.setFontSize(14);
+            doc.text("Breaks:", 14, 110);
+            let y = 118;
+            summary.breaks.forEach(b => {
+                doc.setFontSize(10);
+                const start = `START: ${formatTime(b.start)}`;
+                const end = `END: ${formatTime(b.end)}`;
+                const duration = `DURATION: ${formatDuration(b.duration)}`;
+                doc.text(`${start} - ${end} (${duration})`, 14, y);
+                y += 6;
+            });
+        }
+        
+        doc.save(`TimeFlow-Summary-${selectedDate.toISOString().split('T')[0]}.pdf`);
     };
 
   return (
@@ -60,7 +79,7 @@ export default function EndDayDialog({ isOpen, onClose, entries, selectedDate }:
         </DialogHeader>
         
         <div className="p-4 bg-background max-h-[60vh] overflow-y-auto">
-             <div ref={summaryRef} className="p-4 bg-white text-black light">
+             <div className="p-4 bg-white text-black light">
                 <DailySummary entries={entries} selectedDate={selectedDate} />
              </div>
         </div>
