@@ -32,15 +32,20 @@ export default function EndDayDialog({ isOpen, onClose, entries, selectedDate }:
         const doc = new jsPDF({
             orientation: 'p',
             unit: 'px',
-            format: [content.offsetWidth, content.offsetHeight]
+            format: 'a4'
         });
-
+        
         doc.html(content, {
             callback: function (doc) {
                 doc.save(`TimeFlow-Summary-${selectedDate.toISOString().split('T')[0]}.pdf`);
             },
-            x: 0,
-            y: 0,
+            x: 10,
+            y: 10,
+            html2canvas: {
+                scale: 0.2, // Adjust scale to fit content on the page
+                backgroundColor: '#ffffff'
+            },
+            margin: [10, 10, 10, 10]
         });
     };
 
@@ -54,8 +59,10 @@ export default function EndDayDialog({ isOpen, onClose, entries, selectedDate }:
           </DialogDescription>
         </DialogHeader>
         
-        <div ref={summaryRef} className="p-4 bg-background">
-             <DailySummary entries={entries} selectedDate={selectedDate} />
+        <div className="p-4 bg-background">
+             <div ref={summaryRef} className="p-4 bg-white text-black">
+                <DailySummary entries={entries} selectedDate={selectedDate} />
+             </div>
         </div>
 
         <DialogFooter className="mt-4">
