@@ -60,7 +60,7 @@ export default function EndDayDialog({ isOpen, onClose, entries, selectedDate }:
         </DialogHeader>
         
         <div className="p-4 bg-background max-h-[60vh] overflow-y-auto">
-             <div ref={summaryRef} className="p-4 bg-white text-black">
+             <div ref={summaryRef} className="p-4 bg-white text-black light">
                 <DailySummary entries={entries} selectedDate={selectedDate} />
              </div>
         </div>
