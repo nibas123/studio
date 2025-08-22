@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 const formSchema = z.object({
   clockIn: z.string().optional(),
@@ -45,6 +45,8 @@ const toLocalISOString = (date: Date) => {
 }
 
 export default function ManualEntryDialog({ children, onSave, isClockedIn }: ManualEntryDialogProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
@@ -64,22 +66,19 @@ export default function ManualEntryDialog({ children, onSave, isClockedIn }: Man
   }
 
   useEffect(() => {
-    resetForm();
-  }, [isClockedIn, form]);
+    if(isOpen) {
+        resetForm();
+    }
+  }, [isClockedIn, isOpen]);
 
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     onSave(values);
+    setIsOpen(false);
   }
 
   return (
-    <Dialog onOpenChange={(open) => {
-      if (!open) {
-        form.reset();
-      } else {
-        resetForm();
-      }
-    }}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
@@ -123,9 +122,7 @@ export default function ManualEntryDialog({ children, onSave, isClockedIn }: Man
               )}
             />
             <DialogFooter>
-                <DialogClose asChild>
-                    <Button type="submit">Save Entry</Button>
-                </DialogClose>
+                <Button type="submit">Save Entry</Button>
             </DialogFooter>
           </form>
         </Form>
