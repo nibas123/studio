@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from 'react';
@@ -14,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import DailySummary from './daily-summary';
 import type { TimeEntry } from '@/types';
 import jsPDF from 'jspdf';
-import { calculateDailySummary, formatTime, formatDuration, formatDate, calculateEntryDuation } from '@/lib/time';
+import { calculateDailySummary, formatTime, formatDuration, formatDate, calculateEntryDuration } from '@/lib/time';
 
 interface EndDayDialogProps {
   isOpen: boolean;
