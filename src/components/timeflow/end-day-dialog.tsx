@@ -14,8 +14,7 @@ import { Button } from '@/components/ui/button';
 import DailySummary from './daily-summary';
 import type { TimeEntry } from '@/types';
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
-import { formatDate } from '@/lib/time';
+import { formatDate, formatTime, formatDuration, calculateDailySummary, calculateEntryDuration } from '@/lib/time';
 
 interface EndDayDialogProps {
   isOpen: boolean;
@@ -27,33 +26,59 @@ interface EndDayDialogProps {
 export default function EndDayDialog({ isOpen, onClose, entries, selectedDate }: EndDayDialogProps) {
     
     const handleDownloadPdf = () => {
-        const summaryElement = document.getElementById('pdf-summary');
-        if (!summaryElement) {
-            console.error("Summary element not found for PDF generation.");
-            return;
+        const doc = new jsPDF();
+        const summary = calculateDailySummary(entries, selectedDate);
+
+        // Add a title
+        doc.setFontSize(18);
+        doc.text(`Daily Report for ${formatDate(selectedDate)}`, 14, 22);
+
+        // Summary Section
+        doc.setFontSize(12);
+        doc.text("Summary", 14, 32);
+        doc.line(14, 33, 200, 33); // separator line
+        let y = 40;
+        doc.text(`Total Work: ${formatDuration(summary.totalWork)}`, 14, y);
+        y += 7;
+        doc.text(`Total Break: ${formatDuration(summary.totalBreak)}`, 14, y);
+        y += 7;
+        doc.text(`First Clock In: ${summary.firstClockIn ? formatTime(summary.firstClockIn) : 'N/A'}`, 14, y);
+        y += 7;
+        doc.text(`Last Clock Out: ${summary.lastClockOut ? formatTime(summary.lastClockOut) : 'N/A'}`, 14, y);
+        y += 10;
+        
+        // Time Entries Section
+        if (summary.entries.length > 0) {
+            doc.text("Time Entries", 14, y);
+            doc.line(14, y + 1, 200, y + 1); // separator line
+            y += 8;
+
+            summary.entries.forEach(entry => {
+                const clockIn = `IN: ${formatTime(entry.clockIn)}`;
+                const clockOut = entry.clockOut ? `OUT: ${formatTime(entry.clockOut)}` : 'OUT: In Progress';
+                const duration = `DURATION: ${formatDuration(calculateEntryDuration(entry))}`;
+                doc.text(`${clockIn} - ${clockOut} (${duration})`, 14, y);
+                y += 6;
+            });
+            y += 4;
         }
 
-        // Temporarily make it visible to capture
-        summaryElement.style.display = 'block';
-        
-        html2canvas(summaryElement, { 
-            scale: 2, // Higher scale for better quality
-            useCORS: true,
-            backgroundColor: null, // Use element's background
-        }).then(canvas => {
-            // Hide it again after capture
-            summaryElement.style.display = 'none';
+        // Breaks Section
+        if (summary.breaks.length > 0) {
+            doc.text("Breaks", 14, y);
+            doc.line(14, y + 1, 200, y + 1); // separator line
+            y += 8;
 
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF({
-                orientation: 'portrait',
-                unit: 'px',
-                format: [canvas.width, canvas.height]
+            summary.breaks.forEach(b => {
+                const breakStart = `START: ${formatTime(b.start)}`;
+                const breakEnd = `END: ${formatTime(b.end)}`;
+                const duration = `DURATION: ${formatDuration(b.duration)}`;
+                doc.text(`${breakStart} - ${breakEnd} (${duration})`, 14, y);
+                y += 6;
             });
-            
-            pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-            pdf.save(`TimeFlow-Summary-${formatDate(selectedDate)}.pdf`);
-        });
+        }
+        
+        doc.save(`TimeFlow-Summary-${formatDate(selectedDate)}.pdf`);
     };
 
   return (
@@ -68,14 +93,6 @@ export default function EndDayDialog({ isOpen, onClose, entries, selectedDate }:
         
          <div className="max-h-[60vh] overflow-y-auto p-1">
              <DailySummary entries={entries} selectedDate={selectedDate} />
-        </div>
-
-        {/* Hidden, styled element for PDF generation */}
-        <div style={{ position: 'fixed', left: '-9999px', top: '-9999px', display: 'none' }}>
-            <div id="pdf-summary" className="p-4 light bg-white text-black" style={{ width: '800px' }}>
-                <h1 className="text-2xl font-bold mb-2">Daily Report for {formatDate(selectedDate)}</h1>
-                <DailySummary entries={entries} selectedDate={selectedDate} />
-            </div>
         </div>
 
         <DialogFooter className="mt-4">
