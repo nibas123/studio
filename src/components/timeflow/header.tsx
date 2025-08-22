@@ -2,12 +2,23 @@
 
 import type { AppSettings } from '@/types';
 import { Button } from '@/components/ui/button';
-import { Settings, PlusCircle, Moon, Sun } from 'lucide-react';
+import { Settings, PlusCircle, Trash2 } from 'lucide-react';
 import SettingsDialog from './settings-dialog';
 import ManualEntryDialog from './manual-entry-dialog';
 import { useSidebar } from '@/components/ui/sidebar';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { ThemeToggle } from './theme-toggle';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 
 interface AppHeaderProps {
@@ -36,12 +47,35 @@ export default function AppHeader({ settings, onSaveSettings, onSaveManualEntry,
             <span className="hidden sm:inline">Manual Entry</span>
           </Button>
         </ManualEntryDialog>
-        <SettingsDialog settings={settings} onSave={onSaveSettings} onReset={onResetData}>
+        <SettingsDialog settings={settings} onSave={onSaveSettings}>
           <Button variant="ghost" size="icon">
             <Settings className="h-5 w-5" />
             <span className="sr-only">Settings</span>
           </Button>
         </SettingsDialog>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                <Trash2 className="h-5 w-5" />
+                <span className="sr-only">Reset Data</span>
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete all
+                your time tracking data and reset your settings.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={onResetData}>
+                    Continue
+                </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
         <ThemeToggle />
       </div>
     </header>

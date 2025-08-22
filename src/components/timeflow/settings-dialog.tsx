@@ -15,38 +15,20 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Separator } from '../ui/separator';
 
 interface SettingsDialogProps {
   children: React.ReactNode;
   settings: AppSettings;
   onSave: (settings: AppSettings) => void;
-  onReset: () => void;
 }
 
-export default function SettingsDialog({ children, settings, onSave, onReset }: SettingsDialogProps) {
+export default function SettingsDialog({ children, settings, onSave }: SettingsDialogProps) {
   const [dailyLimit, setDailyLimit] = useState(settings.dailyWorkHourLimit);
 
   const handleSave = () => {
     onSave({ dailyWorkHourLimit: Number(dailyLimit) });
   };
   
-  const handleReset = () => {
-    onReset();
-    setDailyLimit(8);
-  }
-
   return (
     <Dialog>
       <DialogTrigger asChild>{children}</DialogTrigger>
@@ -77,29 +59,6 @@ export default function SettingsDialog({ children, settings, onSave, onReset }: 
             <Button type="submit" onClick={handleSave}>Save changes</Button>
           </DialogClose>
         </DialogFooter>
-        <Separator className="my-2"/>
-         <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant="destructive" className="w-full">Reset All Data</Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete all
-                your time tracking data and reset your settings.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-               <DialogClose asChild>
-                <AlertDialogAction onClick={handleReset}>
-                    Continue
-                </AlertDialogAction>
-              </DialogClose>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
       </DialogContent>
     </Dialog>
   );
