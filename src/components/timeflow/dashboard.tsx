@@ -41,8 +41,8 @@ export default function Dashboard() {
   }, [allEntries, currentTime]);
   
   const totalBreakTodayMs = useMemo(() => {
-    return calculateTodaysBreak(allEntries);
-  }, [allEntries]);
+    return calculateTodaysBreak(allEntries, currentTime);
+  }, [allEntries, currentTime]);
 
   const handleClockIn = () => {
     if (isClockedIn) return;
