@@ -21,9 +21,11 @@ const formSchema = z.object({
   clockIn: z.string().optional(),
   clockOut: z.string().optional(),
 }).refine(data => {
+  // If both are present, clockOut must be after clockIn
   if (data.clockIn && data.clockOut) {
     return new Date(data.clockIn) < new Date(data.clockOut);
   }
+  // If only one is present or none, validation passes
   return true;
 }, {
   message: "Clock out must be after clock in",
@@ -48,21 +50,28 @@ export default function ManualEntryDialog({ children, onSave, isClockedIn }: Man
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      clockIn: '',
+      clockOut: '',
+    },
   });
   
-  const resetForm = () => {
-    const now = toLocalISOString(new Date());
-    form.reset({
-      clockIn: now,
-      clockOut: now,
-    });
-  }
-
   useEffect(() => {
     if(isOpen) {
-        resetForm();
+      const now = toLocalISOString(new Date());
+      if (isClockedIn) {
+        form.reset({
+          clockIn: undefined,
+          clockOut: now,
+        });
+      } else {
+        form.reset({
+          clockIn: now,
+          clockOut: now,
+        });
+      }
     }
-  }, [isOpen, isClockedIn]);
+  }, [isOpen, isClockedIn, form]);
 
 
   function onSubmit(values: z.infer<typeof formSchema>) {
