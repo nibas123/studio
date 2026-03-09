@@ -15,6 +15,11 @@ interface ClockCardProps {
   totalBreakTodayMs: number;
   dailyLimitHours: number;
   clockInTime?: string;
+  wfhDaysUsed: number;
+  monthlyWfhLimit: number;
+  todaysWfhType?: 'full' | 'half';
+  onLogWfh: (type: 'full' | 'half') => void;
+  onUndoWfh: () => void;
 }
 
 export default function ClockCard({
@@ -27,6 +32,11 @@ export default function ClockCard({
   totalBreakTodayMs,
   dailyLimitHours,
   clockInTime,
+  wfhDaysUsed,
+  monthlyWfhLimit,
+  todaysWfhType,
+  onLogWfh,
+  onUndoWfh,
 }: ClockCardProps) {
   const dailyLimitMs = dailyLimitHours * 60 * 60 * 1000;
   const remainingTimeMs = dailyLimitMs - totalWorkTodayMs;
@@ -45,7 +55,12 @@ export default function ClockCard({
       </CardHeader>
       <CardContent className="flex flex-col items-center justify-center space-y-8 pt-6">
         <div className="text-center">
-            {isClockedIn && clockInTime ? (
+            {todaysWfhType ? (
+                <>
+                    <p className="text-muted-foreground pb-2">🏠 Logged as</p>
+                    <p className="text-3xl font-semibold capitalize">{todaysWfhType} Day WFH</p>
+                </>
+            ) : isClockedIn && clockInTime ? (
                 <>
                     <p className="text-muted-foreground">Clocked in at</p>
                     <p className="text-3xl font-semibold">{formatTime(clockInTime)}</p>
@@ -59,14 +74,39 @@ export default function ClockCard({
         </div>
 
         <div className="flex flex-col sm:flex-row items-center gap-4">
-            {!isClockedIn ? (
+            {todaysWfhType ? (
                  <Button
                     size="lg"
                     className="w-56 h-16 text-xl rounded-full shadow-lg transition-transform transform hover:scale-105"
-                    onClick={onClockIn}
+                    onClick={onUndoWfh}
+                    variant="outline"
                 >
-                    <LogIn className="mr-3 h-7 w-7" /> Clock In
+                    Undo WFH
                 </Button>
+            ) : !isClockedIn ? (
+                <div className="flex flex-col items-center gap-2">
+                     <Button
+                        size="lg"
+                        className="w-56 h-16 text-xl rounded-full shadow-lg transition-transform transform hover:scale-105"
+                        onClick={onClockIn}
+                    >
+                        <LogIn className="mr-3 h-7 w-7" /> Clock In
+                    </Button>
+                    <div className="flex gap-2 mt-2">
+                        <button 
+                            onClick={() => onLogWfh('full')}
+                            className="text-xs transition-colors px-3 py-1.5 rounded-full text-muted-foreground hover:bg-secondary border border-border/50"
+                        >
+                            🏠 Log Full WFH
+                        </button>
+                        <button 
+                            onClick={() => onLogWfh('half')}
+                            className="text-xs transition-colors px-3 py-1.5 rounded-full text-muted-foreground hover:bg-secondary border border-border/50"
+                        >
+                            Log Half WFH
+                        </button>
+                    </div>
+                </div>
             ) : (
                 <>
                     <Button
@@ -111,6 +151,16 @@ export default function ClockCard({
               {formatDuration(overtimeMs)}
             </p>
           </div>
+        </div>
+
+        {/* WFH Month Tracker */}
+        <div className="w-full max-w-3xl mx-auto pt-4 text-center">
+             <div className="inline-flex items-center gap-2 bg-background/50 px-4 py-2 rounded-full text-sm font-medium border border-border/50">
+                 🏠 WFH Days Used This Month: 
+                 <span className={`${wfhDaysUsed >= monthlyWfhLimit ? 'text-destructive font-bold' : 'text-primary'}`}>
+                    {wfhDaysUsed} / {monthlyWfhLimit}
+                 </span>
+             </div>
         </div>
       </CardContent>
     </Card>

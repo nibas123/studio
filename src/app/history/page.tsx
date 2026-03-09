@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import type { TimeEntry, AppSettings } from '@/types';
 import { v4 as uuidv4 } from 'uuid';
@@ -18,7 +18,11 @@ export default function HistoryPage() {
     });
     const [allEntries, setAllEntries] = useLocalStorage<TimeEntry[]>('timeflow-entries', []);
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+    const [mounted, setMounted] = useState(false);
 
+    useEffect(() => {
+        setMounted(true);
+    }, []);
     const currentEntry = useMemo(() => {
         return allEntries.find(entry => entry.clockOut === null);
     }, [allEntries]);
@@ -44,7 +48,7 @@ export default function HistoryPage() {
             const newEntry: TimeEntry = {
                 id: uuidv4(),
                 clockIn: new Date(entry.clockIn).toISOString(),
-                clockOut: null,
+                clockOut: entry.clockOut ? new Date(entry.clockOut).toISOString() : null,
             };
             setAllEntries(prev => [...prev, newEntry]);
         }
@@ -63,6 +67,8 @@ export default function HistoryPage() {
         setSettings({ dailyWorkHourLimit: 8 });
     };
 
+
+    if (!mounted) return null;
 
     return (
         <AppLayout>

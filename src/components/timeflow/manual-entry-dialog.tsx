@@ -42,6 +42,7 @@ const toLocalISOString = (date: Date) => {
 
 export default function ManualEntryDialog({ children, onSave, isClockedIn }: ManualEntryDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [showClockOut, setShowClockOut] = useState(false);
   
   const form = useForm({
     resolver: zodResolver(isClockedIn ? clockOutSchema : clockInSchema),
@@ -56,8 +57,10 @@ export default function ManualEntryDialog({ children, onSave, isClockedIn }: Man
       const now = toLocalISOString(new Date());
       if (isClockedIn) {
           form.reset({ clockOut: now });
+          setShowClockOut(true);
       } else {
-          form.reset({ clockIn: now, clockOut: now });
+          form.reset({ clockIn: now, clockOut: '' });
+          setShowClockOut(false);
       }
     }
   }, [isOpen, isClockedIn, form]);
@@ -71,7 +74,7 @@ export default function ManualEntryDialog({ children, onSave, isClockedIn }: Man
   const title = isClockedIn ? "Manual Clock Out" : "Manual Time Entry";
   const description = isClockedIn 
     ? "You are currently clocked in. Enter a clock out time to complete your current session."
-    : "Forgot to record a work session? Add a complete entry here.";
+    : "Forgot to clock in? Enter your start time. Leave 'Clock Out' blank if you are still working.";
   
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -100,19 +103,33 @@ export default function ManualEntryDialog({ children, onSave, isClockedIn }: Man
                     )}
                 />
             )}
-            <FormField
-                control={form.control}
-                name="clockOut"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Clock Out</FormLabel>
-                    <FormControl>
-                      <Input type="datetime-local" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            {showClockOut || isClockedIn ? (
+                <FormField
+                    control={form.control}
+                    name="clockOut"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{!isClockedIn ? "Clock Out (Optional)" : "Clock Out"}</FormLabel>
+                        <FormControl>
+                          <Input type="datetime-local" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+            ) : (
+                <div className="pt-2">
+                    <Button 
+                        type="button" 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => setShowClockOut(true)} 
+                        className="w-full text-muted-foreground border border-dashed text-xs"
+                    >
+                        + Add clock out time
+                    </Button>
+                </div>
+            )}
             <DialogFooter>
                 <DialogClose asChild>
                     <Button type="button" variant="secondary">Close</Button>

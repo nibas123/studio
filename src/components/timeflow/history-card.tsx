@@ -36,7 +36,7 @@ export default function HistoryCard({ entries, onDelete, onUpdate }: HistoryCard
     onUpdate({
       id,
       clockIn: new Date(editValues.clockIn).toISOString(),
-      clockOut: new Date(editValues.clockOut).toISOString(),
+      clockOut: editValues.clockOut ? new Date(editValues.clockOut).toISOString() : null,
     });
     setEditingEntryId(null);
   };

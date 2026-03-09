@@ -24,9 +24,13 @@ interface SettingsDialogProps {
 
 export default function SettingsDialog({ children, settings, onSave }: SettingsDialogProps) {
   const [dailyLimit, setDailyLimit] = useState(settings.dailyWorkHourLimit);
+  const [wfhLimit, setWfhLimit] = useState(settings.monthlyWfhLimit ?? 5);
 
   const handleSave = () => {
-    onSave({ dailyWorkHourLimit: Number(dailyLimit) });
+    onSave({ 
+        dailyWorkHourLimit: Number(dailyLimit),
+        monthlyWfhLimit: Number(wfhLimit)
+    });
   };
   
   return (
@@ -51,6 +55,19 @@ export default function SettingsDialog({ children, settings, onSave }: SettingsD
               onChange={(e) => setDailyLimit(Number(e.target.value))}
               className="col-span-3"
               placeholder="e.g., 8"
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="wfh-limit" className="text-right">
+              Monthly WFH Limit
+            </Label>
+            <Input
+              id="wfh-limit"
+              type="number"
+              value={wfhLimit}
+              onChange={(e) => setWfhLimit(Number(e.target.value))}
+              className="col-span-3"
+              placeholder="e.g., 5"
             />
           </div>
         </div>
