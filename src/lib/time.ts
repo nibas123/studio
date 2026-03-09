@@ -71,14 +71,6 @@ export const calculateTodaysBreak = (
     const lastEntry = todaysEntries[todaysEntries.length - 1];
     const isClockedIn = lastEntry.clockOut === null;
 
-    // If currently clocked out, add the time since the last clock out
-    if (!isClockedIn) {
-        const lastClockOut = new Date(lastEntry.clockOut!);
-        if (isSameDay(lastClockOut, currentTime)) {
-           totalBreak += differenceInMilliseconds(currentTime, lastClockOut);
-        }
-    }
-
     return totalBreak;
 }
 

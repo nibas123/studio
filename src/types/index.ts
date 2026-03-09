@@ -2,10 +2,12 @@ export interface TimeEntry {
   id: string;
   clockIn: string; // ISO Date string
   clockOut: string | null; // ISO Date string or null
+  wfhType?: 'full' | 'half';
 }
 
 export interface AppSettings {
   dailyWorkHourLimit: number;
+  monthlyWfhLimit?: number;
 }
 
 export interface BreakEntry {
