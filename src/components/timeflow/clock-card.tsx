@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Clock, LogIn, LogOut, DoorOpen } from 'lucide-react';
 import { formatTime, formatDuration } from '@/lib/time';
+import { format } from 'date-fns';
 
 interface ClockCardProps {
   currentTime: Date;
@@ -20,6 +21,8 @@ interface ClockCardProps {
   todaysWfhType?: 'full' | 'half';
   onLogWfh: (type: 'full' | 'half') => void;
   onUndoWfh: () => void;
+  onAddWfh: () => void;
+  onSubtractWfh: () => void;
 }
 
 export default function ClockCard({
@@ -37,10 +40,16 @@ export default function ClockCard({
   todaysWfhType,
   onLogWfh,
   onUndoWfh,
+  onAddWfh,
+  onSubtractWfh,
 }: ClockCardProps) {
   const dailyLimitMs = dailyLimitHours * 60 * 60 * 1000;
   const remainingTimeMs = dailyLimitMs - totalWorkTodayMs;
   const overtimeMs = totalWorkTodayMs > dailyLimitMs ? totalWorkTodayMs - dailyLimitMs : 0;
+  
+  const targetOutTime = remainingTimeMs > 0
+    ? new Date(currentTime.getTime() + remainingTimeMs)
+    : null;
 
   return (
     <Card className="w-full shadow-lg border-none bg-card/50">
@@ -130,11 +139,17 @@ export default function ClockCard({
         </div>
 
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 w-full text-center pt-6 max-w-3xl mx-auto">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6 w-full text-center pt-6 max-w-5xl mx-auto">
           <div className="bg-background/50 p-4 rounded-lg">
             <p className="text-sm text-muted-foreground uppercase tracking-wider">Time Left</p>
             <p className={`text-2xl sm:text-3xl font-bold font-mono ${remainingTimeMs < 0 ? 'text-muted-foreground' : 'text-primary'}`}>
               {formatDuration(remainingTimeMs)}
+            </p>
+          </div>
+          <div className="bg-background/50 p-4 rounded-lg">
+            <p className="text-sm text-muted-foreground uppercase tracking-wider">Target Out</p>
+            <p className="text-xl sm:text-2xl font-bold font-mono pt-1">
+              {remainingTimeMs <= 0 ? 'Done' : targetOutTime ? formatTime(targetOutTime) : '--:--'}
             </p>
           </div>
           <div className="bg-background/50 p-4 rounded-lg">
@@ -157,9 +172,17 @@ export default function ClockCard({
         <div className="w-full max-w-3xl mx-auto pt-4 text-center">
              <div className="inline-flex items-center gap-2 bg-background/50 px-4 py-2 rounded-full text-sm font-medium border border-border/50">
                  🏠 WFH Days Used This Month: 
-                 <span className={`${wfhDaysUsed >= monthlyWfhLimit ? 'text-destructive font-bold' : 'text-primary'}`}>
-                    {wfhDaysUsed} / {monthlyWfhLimit}
-                 </span>
+                 <div className="flex items-center gap-2 ml-2">
+                     <button onClick={onSubtractWfh} disabled={wfhDaysUsed <= 0} className="hover:bg-secondary px-2 py-0.5 rounded-md disabled:opacity-50">
+                         -
+                     </button>
+                     <span className={`${wfhDaysUsed >= monthlyWfhLimit ? 'text-destructive font-bold' : 'text-primary'}`}>
+                        {wfhDaysUsed} / {monthlyWfhLimit}
+                     </span>
+                     <button onClick={onAddWfh} className="hover:bg-secondary px-2 py-0.5 rounded-md">
+                         +
+                     </button>
+                 </div>
              </div>
         </div>
       </CardContent>

@@ -19,6 +19,7 @@ export default function Dashboard() {
     monthlyWfhLimit: 5,
   });
   const [allEntries, setAllEntries] = useLocalStorage<TimeEntry[]>('timeflow-entries', []);
+  const [manualWfhDays, setManualWfhDays] = useLocalStorage<number>('timeflow-manual-wfh', 0);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [showEndDayDialog, setShowEndDayDialog] = useState(false);
@@ -63,22 +64,7 @@ export default function Dashboard() {
     return calculateTodaysBreak(allEntries, currentTime);
   }, [allEntries, currentTime]);
 
-  const wfhDaysUsedThisMonth = useMemo(() => {
-    const start = startOfMonth(currentTime);
-    const end = endOfMonth(currentTime);
-    const wfhEntries = allEntries.filter(e => e.wfhType && isWithinInterval(new Date(e.clockIn), { start, end }));
-    
-    let total = 0;
-    const daysSeen = new Set<string>();
-    wfhEntries.forEach(e => {
-       const day = e.clockIn.split('T')[0];
-       if (!daysSeen.has(day)) {
-           daysSeen.add(day);
-           total += e.wfhType === 'half' ? 0.5 : 1;
-       }
-    });
-    return total;
-  }, [allEntries, currentTime]);
+  // WFH Days are now fully manual
 
   const todaysWfh = useMemo(() => {
     return allEntries.find(e => e.wfhType && isSameDay(new Date(e.clockIn), currentTime));
@@ -194,11 +180,13 @@ export default function Dashboard() {
               totalBreakTodayMs={totalBreakTodayMs}
               dailyLimitHours={settings.dailyWorkHourLimit}
               clockInTime={currentEntry?.clockIn}
-              wfhDaysUsed={wfhDaysUsedThisMonth}
+              wfhDaysUsed={manualWfhDays}
               monthlyWfhLimit={settings.monthlyWfhLimit ?? 5}
               todaysWfhType={todaysWfh?.wfhType}
               onLogWfh={handleLogWfh}
               onUndoWfh={handleUndoWfh}
+              onAddWfh={() => setManualWfhDays(prev => prev + 0.5)}
+              onSubtractWfh={() => setManualWfhDays(prev => Math.max(0, prev - 0.5))}
           />
         {showEndDayDialog && (
           <EndDayDialog
